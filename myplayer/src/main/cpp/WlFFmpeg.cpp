@@ -4,7 +4,8 @@
 
 #include "WlFFmpeg.h"
 
-WlFFmpeg::WlFFmpeg(WlCallJava *callJava, const char *url) {
+WlFFmpeg::WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url) {
+    this->playstatus = playstatus;
     this->callJava = callJava;
     this->url = url;
 }
@@ -42,10 +43,12 @@ void WlFFmpeg::decodeFFmpegThread() {
         return;
     }
     for(int i = 0; i < pFormatCtx->nb_streams; i++){
-        if(audio == NULL){
-            audio = new WlAudio();
-            audio->streamIndex = i;
-            audio->codecpar = pFormatCtx->streams[i]->codecpar;
+        if(pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+            if(audio == NULL){
+                audio = new WlAudio(playstatus);
+                audio->streamIndex = i;
+                audio->codecpar = pFormatCtx->streams[i]->codecpar;
+            }
         }
     }
     AVCodec *dec = avcodec_find_decoder(audio->codecpar->codec_id);
@@ -101,8 +104,7 @@ void WlFFmpeg::start() {
                 if(LOG_DEBUG){
                     LOGE("解码第 %d 帧", count);
                 }
-                av_packet_free(&avPacket);
-                av_free(avPacket);
+                audio->queue->putAvpacket(avPacket);
             }else{
                 av_packet_free(&avPacket);
                 av_free(avPacket);

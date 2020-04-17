@@ -51,6 +51,8 @@ add_library( # Sets the name of the library.
         src/main/cpp/WlAudio.cpp
         src/main/cpp/WlCallJava.cpp
         src/main/cpp/WlFFmpeg.cpp
+        src/main/cpp/WlQueue.cpp
+        src/main/cpp/WlPlaystatus.cpp
         )
 
 

@@ -6,6 +6,8 @@
 #define MYMUSIC_WLAUDIO_H
 
 
+#include "WlQueue.h"
+
 extern "C"{
 #include "include/libavcodec/avcodec.h"
 };
@@ -16,9 +18,12 @@ public:
     int streamIndex = -1;
     AVCodecContext *avCodecContext = NULL;
     AVCodecParameters *codecpar = NULL;
+    WlQueue *queue = NULL;
+    WlPlaystatus *playstatus = NULL;
+
 
 public:
-    WlAudio();
+    WlAudio(WlPlaystatus *playstatus);
     ~WlAudio();
 };
 

@@ -8,6 +8,7 @@
 #include "WlCallJava.h"
 #include <pthread.h>
 #include "WlAudio.h"
+#include "WlPlaystatus.h"
 
 extern  "C"
 {
@@ -22,9 +23,10 @@ public:
     pthread_t decodeThread;
     AVFormatContext *pFormatCtx = NULL;
     WlAudio *audio = NULL;
+    WlPlaystatus *playstatus = NULL;
 
 public:
-    WlFFmpeg(WlCallJava *callJava, const char *url);
+    WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url);
     ~WlFFmpeg();
 
     void parpared();
