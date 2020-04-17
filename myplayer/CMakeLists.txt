@@ -46,7 +46,12 @@ set_target_properties(swscale-4
 add_library( # Sets the name of the library.
         native-lib
         SHARED
-        src/main/cpp/native-lib.cpp)
+
+        src/main/cpp/native-lib.cpp
+        src/main/cpp/WlAudio.cpp
+        src/main/cpp/WlCallJava.cpp
+        src/main/cpp/WlFFmpeg.cpp
+        )
 
 
 target_link_libraries( # Specifies the target library.

@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <string>
 #include "android/log.h"
+#include "WlCallJava.h"
+#include "WlFFmpeg.h"
 
 extern  "C"
 {
@@ -8,30 +10,43 @@ extern  "C"
 }
 
 
-#define LOGI(FORMAT,...) __android_log_print(ANDROID_LOG_INFO,"ywl5320",FORMAT,##__VA_ARGS__);
+_JavaVM *javaVM = NULL;
+WlCallJava *callJava = NULL;
+WlFFmpeg *fFmpeg = NULL;
+
+
+extern "C"
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved){
+    jint result = -1;
+    javaVM = vm;
+    JNIEnv *env;
+    if(vm->GetEnv((void **)&env, JNI_VERSION_1_4) != JNI_OK){
+        return result;
+    }
+    return JNI_VERSION_1_4;
+}
 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_Demo_testFfmpeg(JNIEnv *env, jobject thiz) {
-    av_register_all();
-    AVCodec *c_temp = av_codec_next(NULL);
-    while (c_temp != NULL)
-    {
-        switch (c_temp->type)
-        {
-            case AVMEDIA_TYPE_VIDEO:
-                LOGI("[Video]:%s", c_temp->name);
-                break;
-            case AVMEDIA_TYPE_AUDIO:
-                LOGI("[Audio]:%s", c_temp->name);
-                break;
-            default:
-                LOGI("[Other]:%s", c_temp->name);
-                break;
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1parpared(JNIEnv *env, jobject instance, jstring source_) {
+    const char *source = env->GetStringUTFChars(source_, 0);
+
+    if(fFmpeg == NULL){
+        if(callJava == NULL){
+            callJava = new WlCallJava(javaVM, env, &instance);
         }
-        c_temp = c_temp->next;
+        fFmpeg = new WlFFmpeg(callJava, source);
+        fFmpeg->parpared();
     }
+}
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1start(JNIEnv *env, jobject thiz) {
 
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->start();
+    }
 }
