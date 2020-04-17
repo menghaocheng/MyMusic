@@ -6,14 +6,15 @@
 #define MYMUSIC_WLFFMPEG_H
 
 #include "WlCallJava.h"
-#include <pthread.h>
+#include "pthread.h"
 #include "WlAudio.h"
 #include "WlPlaystatus.h"
 
-extern  "C"
+extern "C"
 {
-#include <libavformat/avformat.h>
-}
+#include "libavformat/avformat.h"
+};
+
 
 class WlFFmpeg {
 

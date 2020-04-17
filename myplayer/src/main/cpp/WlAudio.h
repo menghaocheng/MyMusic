@@ -7,9 +7,11 @@
 
 
 #include "WlQueue.h"
+#include "WlPlaystatus.h"
 
-extern "C"{
-#include "include/libavcodec/avcodec.h"
+extern "C"
+{
+#include "libavcodec/avcodec.h"
 };
 
 class WlAudio {

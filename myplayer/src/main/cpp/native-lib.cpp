@@ -1,8 +1,7 @@
 #include <jni.h>
 #include <string>
-#include "android/log.h"
-#include "WlCallJava.h"
 #include "WlFFmpeg.h"
+#include "WlPlaystatus.h"
 
 extern  "C"
 {

@@ -86,8 +86,8 @@ void WlFFmpeg::decodeFFmpegThread() {
 
 void WlFFmpeg::start() {
 
-    if(audio == NULL){
-        if(LOG_DEBUG){
+    if (audio == NULL) {
+        if (LOG_DEBUG) {
             LOGE("audio is null");
         }
         return;
@@ -95,22 +95,22 @@ void WlFFmpeg::start() {
 
     int count = 0;
 
-    while(1){
+    while (1) {
         AVPacket *avPacket = av_packet_alloc();
-        if(av_read_frame(pFormatCtx, avPacket) == 0){
-            if(avPacket->stream_index == audio->streamIndex){
+        if (av_read_frame(pFormatCtx, avPacket) == 0) {
+            if (avPacket->stream_index == audio->streamIndex) {
                 //解码操作
                 count++;
-                if(LOG_DEBUG){
+                if (LOG_DEBUG) {
                     LOGE("解码第 %d 帧", count);
                 }
                 audio->queue->putAvpacket(avPacket);
-            }else{
+            } else {
                 av_packet_free(&avPacket);
                 av_free(avPacket);
             }
         } else {
-            if(LOG_DEBUG){
+            if (LOG_DEBUG) {
                 LOGE("decode finished");
             }
             av_packet_free(&avPacket);
@@ -118,7 +118,16 @@ void WlFFmpeg::start() {
             break;
         }
     }
+    //模拟出队
+    while (audio->queue->getQueueSize() > 0) {
+        AVPacket *packet = av_packet_alloc();
+        audio->queue->getAvpacket(packet);
+        av_packet_free(&packet);
+        av_free(packet);
+        packet = NULL;
+    }
+    if (LOG_DEBUG) {
+        LOGD("解码完成");
+    }
+
 }
-
-
-
