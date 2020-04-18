@@ -69,6 +69,9 @@ public class WlPlayer {
         }).start();
     }
 
+    /**
+     * c++回调java的方法
+     */
     public void onCallParpared(){
         if(wlOnParparedListener != null){
             wlOnParparedListener.onParpared();

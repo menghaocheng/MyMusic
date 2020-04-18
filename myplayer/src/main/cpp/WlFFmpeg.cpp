@@ -32,7 +32,7 @@ void WlFFmpeg::decodeFFmpegThread() {
     pFormatCtx = avformat_alloc_context();
     if(avformat_open_input(&pFormatCtx, url, NULL, NULL) != 0){
         if(LOG_DEBUG){
-            LOGE("can not open url ：%s", url);
+            LOGE("open url [%s] failed: %s", url, strerror(errno));
         }
         return;
     }
@@ -43,7 +43,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         return;
     }
     for(int i = 0; i < pFormatCtx->nb_streams; i++){
-        if(pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
+        if(pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){//得到音频流
             if(audio == NULL){
                 audio = new WlAudio(playstatus);
                 audio->streamIndex = i;
@@ -92,10 +92,11 @@ void WlFFmpeg::start() {
         }
         return;
     }
+    audio->play();
 
     int count = 0;
 
-    while (1) {
+    while (playstatus != NULL && !playstatus->exit) {
         AVPacket *avPacket = av_packet_alloc();
         if (av_read_frame(pFormatCtx, avPacket) == 0) {
             if (avPacket->stream_index == audio->streamIndex) {
@@ -110,22 +111,20 @@ void WlFFmpeg::start() {
                 av_free(avPacket);
             }
         } else {
-            if (LOG_DEBUG) {
-                LOGE("decode finished");
-            }
             av_packet_free(&avPacket);
             av_free(avPacket);
-            break;
+            while(playstatus != NULL && !playstatus->exit){
+                if(audio->queue->getQueueSize() > 0){
+                    continue;
+                } else {
+                    playstatus->exit = true;
+                    break;
+                }
+            }
+
         }
     }
-    //模拟出队
-    while (audio->queue->getQueueSize() > 0) {
-        AVPacket *packet = av_packet_alloc();
-        audio->queue->getAvpacket(packet);
-        av_packet_free(&packet);
-        av_free(packet);
-        packet = NULL;
-    }
+
     if (LOG_DEBUG) {
         LOGD("解码完成");
     }

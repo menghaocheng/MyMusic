@@ -26,6 +26,8 @@ public:
     WlAudio *audio = NULL;
     WlPlaystatus *playstatus = NULL;
 
+
+
 public:
     WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url);
     ~WlFFmpeg();

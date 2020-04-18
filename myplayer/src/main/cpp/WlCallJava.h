@@ -13,6 +13,7 @@
 #define MAIN_THREAD 0
 #define CHILD_THREAD 1
 
+
 class WlCallJava {
 
 public:

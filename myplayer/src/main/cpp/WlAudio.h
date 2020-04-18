@@ -12,6 +12,7 @@
 extern "C"
 {
 #include "libavcodec/avcodec.h"
+#include <libswresample/swresample.h>
 };
 
 class WlAudio {
@@ -23,10 +24,23 @@ public:
     WlQueue *queue = NULL;
     WlPlaystatus *playstatus = NULL;
 
+    pthread_t thread_play;
+    AVPacket *avPacket = NULL;
+    AVFrame *avFrame = NULL;
+    int ret = 0;
+    uint8_t *buffer = NULL;
+    int data_size = 0;
+
+
 
 public:
     WlAudio(WlPlaystatus *playstatus);
     ~WlAudio();
+
+    void play();
+    int resampleAudio();
+
+
 };
 
 
