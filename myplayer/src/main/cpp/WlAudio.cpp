@@ -4,7 +4,8 @@
 
 #include "WlAudio.h"
 
-WlAudio::WlAudio(WlPlaystatus *playstatus, int sample_rate) {
+WlAudio::WlAudio(WlPlaystatus *playstatus, int sample_rate, WlCallJava *callJava) {
+    this->callJava = callJava;
     this->playstatus = playstatus;
     this->sample_rate = sample_rate;
     queue = new WlQueue(playstatus);
@@ -30,6 +31,20 @@ void WlAudio::play() {
 int WlAudio::resampleAudio() {
 
     while(playstatus != NULL && !playstatus->exit){
+
+        if(queue->getQueueSize() == 0) { //加载中
+            if(!playstatus->load){
+                playstatus->load = true;
+                callJava->onCallLoad(CHILD_THREAD, true);
+            }
+            continue;
+        } else{
+            if(playstatus->load){
+                playstatus->load = false;
+                callJava->onCallLoad(CHILD_THREAD, false);
+            }
+        }
+
         avPacket = av_packet_alloc();
         if(queue->getAvpacket(avPacket) != 0){
             av_packet_free(&avPacket);
@@ -86,9 +101,6 @@ int WlAudio::resampleAudio() {
             int out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
             data_size = nb * out_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 
-            if(LOG_DEBUG){
-                LOGE("data_size is %d", data_size);
-            }
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
@@ -228,4 +240,16 @@ int WlAudio::getCurrentSampleRateForOpensles(int sample_rate) {
             rate =  SL_SAMPLINGRATE_44_1;
     }
     return rate;
+}
+
+void WlAudio::pause() {
+    if(pcmPlayerPlay != NULL){
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay, SL_PLAYSTATE_PAUSED);
+    }
+}
+
+void WlAudio::resume() {
+    if(pcmPlayerPlay != NULL){
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay, SL_PLAYSTATE_PLAYING);
+    }
 }

@@ -8,6 +8,7 @@
 
 #include "WlQueue.h"
 #include "WlPlaystatus.h"
+#include "WlCallJava.h"
 
 extern "C"
 {
@@ -25,6 +26,7 @@ public:
     AVCodecParameters *codecpar = NULL;
     WlQueue *queue = NULL;
     WlPlaystatus *playstatus = NULL;
+    WlCallJava *callJava = NULL;
 
     pthread_t thread_play;
     AVPacket *avPacket = NULL;
@@ -51,7 +53,7 @@ public:
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
 
 public:
-    WlAudio(WlPlaystatus *playstatus, int sample_rate);
+    WlAudio(WlPlaystatus *playstatus, int sample_rate, WlCallJava *callJava);
     ~WlAudio();
 
     void play();
@@ -61,6 +63,9 @@ public:
 
     int getCurrentSampleRateForOpensles(int sample_rate);
 
+    void pause();
+
+    void resume();
 
 
 };

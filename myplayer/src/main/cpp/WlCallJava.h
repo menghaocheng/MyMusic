@@ -22,12 +22,15 @@ public:
     jobject jobj;
 
     jmethodID jmid_parpared;
+    jmethodID jmid_load;
 
 public:
     WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj);
     ~WlCallJava();
 
     void onCallParpared(int type);
+
+    void onCallLoad(int type, bool load);
 
 };
 

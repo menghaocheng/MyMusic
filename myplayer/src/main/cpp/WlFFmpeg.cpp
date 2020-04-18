@@ -45,7 +45,7 @@ void WlFFmpeg::decodeFFmpegThread() {
     for(int i = 0; i < pFormatCtx->nb_streams; i++){
         if(pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){//得到音频流
             if(audio == NULL){
-                audio = new WlAudio(playstatus, pFormatCtx->streams[i]->codecpar->sample_rate);
+                audio = new WlAudio(playstatus, pFormatCtx->streams[i]->codecpar->sample_rate, callJava);
                 audio->streamIndex = i;
                 audio->codecpar = pFormatCtx->streams[i]->codecpar;
             }
@@ -94,17 +94,11 @@ void WlFFmpeg::start() {
     }
     audio->play();
 
-    int count = 0;
 
     while (playstatus != NULL && !playstatus->exit) {
         AVPacket *avPacket = av_packet_alloc();
         if (av_read_frame(pFormatCtx, avPacket) == 0) {
             if (avPacket->stream_index == audio->streamIndex) {
-                //解码操作
-                count++;
-                if (LOG_DEBUG) {
-                    LOGE("解码第 %d 帧", count);
-                }
                 audio->queue->putAvpacket(avPacket);
             } else {
                 av_packet_free(&avPacket);
@@ -129,4 +123,16 @@ void WlFFmpeg::start() {
         LOGD("解码完成");
     }
 
+}
+
+void WlFFmpeg::pause() {
+    if(audio != NULL){
+        audio->pause();
+    }
+}
+
+void WlFFmpeg::resume() {
+    if(audio != NULL){
+        audio->resume();
+    }
 }

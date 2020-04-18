@@ -2,7 +2,9 @@ package com.example.myplayer.MlPlayer;
 
 import android.text.TextUtils;
 
+import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
+import com.example.myplayer.listener.WlOnPauseResumeListener;
 import com.example.myplayer.log.MyLog;
 
 public class WlPlayer {
@@ -22,6 +24,8 @@ public class WlPlayer {
 
     private String source; //数据源
     private WlOnParparedListener wlOnParparedListener;
+    private WlOnLoadListener wlOnLoadListener;
+    private WlOnPauseResumeListener wlOnPauseResumeListener;
 
     public WlPlayer(){}
 
@@ -42,11 +46,20 @@ public class WlPlayer {
         this.wlOnParparedListener = wlOnParparedListener;
     }
 
+    public void setWlOnLoadListener(WlOnLoadListener wlOnLoadListener) {
+        this.wlOnLoadListener = wlOnLoadListener;
+    }
+
+    public void setWlOnPauseResumeListener(WlOnPauseResumeListener wlOnPauseResumeListener) {
+        this.wlOnPauseResumeListener = wlOnPauseResumeListener;
+    }
+
     public void parpared(){
         if(TextUtils.isEmpty(source)){
             MyLog.d("source not be empty");
             return;
         }
+        onCallLoad(true);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -69,6 +82,19 @@ public class WlPlayer {
         }).start();
     }
 
+    public void pause(){
+        n_pause();
+        if(wlOnPauseResumeListener != null){
+            wlOnPauseResumeListener.onPause(true);
+        }
+    }
+
+    public void resume(){
+        n_resume();
+        if(wlOnPauseResumeListener != null){
+            wlOnPauseResumeListener.onPause(false);
+        }
+    }
     /**
      * c++回调java的方法
      */
@@ -78,6 +104,19 @@ public class WlPlayer {
         }
     }
 
-    public native void n_parpared(String source);
-    public native void n_start();
+    public void onCallLoad(boolean load){
+        if(wlOnLoadListener != null){
+            wlOnLoadListener.onLoad(load);
+        }
+    }
+
+    private native void n_parpared(String source);
+    private native void n_start();
+    private native void n_pause();
+    private native void n_resume();
+
+
+
+
+
 }

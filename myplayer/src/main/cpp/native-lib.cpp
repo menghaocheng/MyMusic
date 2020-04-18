@@ -49,4 +49,18 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1start(JNIEnv *env, jobject thiz) 
     if(fFmpeg != NULL){
         fFmpeg->start();
     }
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1pause(JNIEnv *env, jobject thiz) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->pause();
+    }
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1resume(JNIEnv *env, jobject thiz) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->resume();
+    }
 }
