@@ -2,9 +2,11 @@ package com.example.myplayer.MlPlayer;
 
 import android.text.TextUtils;
 
+import com.example.myplayer.WlTimeInfoBean;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
+import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.log.MyLog;
 
 public class WlPlayer {
@@ -23,9 +25,11 @@ public class WlPlayer {
     }
 
     private String source; //数据源
+    private static WlTimeInfoBean wlTimeInfoBean;
     private WlOnParparedListener wlOnParparedListener;
     private WlOnLoadListener wlOnLoadListener;
     private WlOnPauseResumeListener wlOnPauseResumeListener;
+    private WlOnTimeInfoListener wlOnTimeInfoListener;
 
     public WlPlayer(){}
 
@@ -52,6 +56,10 @@ public class WlPlayer {
 
     public void setWlOnPauseResumeListener(WlOnPauseResumeListener wlOnPauseResumeListener) {
         this.wlOnPauseResumeListener = wlOnPauseResumeListener;
+    }
+
+    public void setWlOnTimeInfoListener(WlOnTimeInfoListener wlOnTimeInfoListener) {
+        this.wlOnTimeInfoListener = wlOnTimeInfoListener;
     }
 
     public void parpared(){
@@ -109,6 +117,18 @@ public class WlPlayer {
             wlOnLoadListener.onLoad(load);
         }
     }
+
+    public void onCallTimeInfo(int currentTime, int totalTime){
+        if(wlOnTimeInfoListener != null){
+            if(wlTimeInfoBean == null){
+                wlTimeInfoBean = new WlTimeInfoBean();
+            }
+            wlTimeInfoBean.setCurrentTime(currentTime);
+            wlTimeInfoBean.setTotalTime(totalTime);
+            wlOnTimeInfoListener.onTimeInfo(wlTimeInfoBean);
+        }
+    }
+
 
     private native void n_parpared(String source);
     private native void n_start();
