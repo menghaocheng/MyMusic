@@ -15,6 +15,7 @@ extern "C"
 #include "libavcodec/avcodec.h"
 };
 
+
 class WlQueue {
 
 public:
@@ -32,6 +33,12 @@ public:
     int getAvpacket(AVPacket *packet);
 
     int getQueueSize();
+
+    void clearAvpacket();
+
+
+
+
 };
 
 

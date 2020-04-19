@@ -2,16 +2,15 @@
 // Created by Administrator on 2020/4/17.
 //
 
+
 #include "WlFFmpeg.h"
 
 WlFFmpeg::WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url) {
     this->playstatus = playstatus;
     this->callJava = callJava;
     this->url = url;
-}
-
-WlFFmpeg::~WlFFmpeg() {
-
+	exit = false;
+	pthread_mutex_init(&init_mutex, NULL);
 }
 
 void *decodeFFmpeg(void *data){
@@ -25,21 +24,37 @@ void WlFFmpeg::parpared() {
     pthread_create(&decodeThread, NULL, decodeFFmpeg, this);
 }
 
+int avformat_callback(void *ctx){
+    WlFFmpeg *fFmpeg = (WlFFmpeg*)ctx;
+    if(fFmpeg->playstatus->exit){
+        return AVERROR_EOF;
+    }
+    return 0;
+}
 
 void WlFFmpeg::decodeFFmpegThread() {
+    pthread_mutex_lock(&init_mutex);
     av_register_all();
     avformat_network_init();
     pFormatCtx = avformat_alloc_context();
+
+    pFormatCtx->interrupt_callback.callback = avformat_callback;
+    pFormatCtx->interrupt_callback.opaque = this;
+
     if(avformat_open_input(&pFormatCtx, url, NULL, NULL) != 0){
         if(LOG_DEBUG){
             LOGE("open url [%s] failed: %s", url, strerror(errno));
         }
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
         return;
     }
     if(avformat_find_stream_info(pFormatCtx, NULL) < 0){
         if(LOG_DEBUG){
             LOGE("can not find streams from %s", url);
         }
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
         return;
     }
     for(int i = 0; i < pFormatCtx->nb_streams; i++){
@@ -58,6 +73,8 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not find decoder");
         }
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
         return;
     }
 
@@ -66,13 +83,17 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not alloc new decodectx");
         }
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
         return;
     }
 
     if(avcodec_parameters_to_context(audio->avCodecContext, audio->codecpar) < 0){
         if(LOG_DEBUG){
-            LOGE("can not fil decodectx");
+            LOGE("can not fill decodecctx");
         }
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
         return;
     }
 
@@ -80,9 +101,19 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not open audio streams");
         }
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
         return;
     }
-    callJava->onCallParpared(CHILD_THREAD);
+    if(callJava != NULL){
+        if(playstatus != NULL && !playstatus->exit){
+            callJava->onCallParpared(CHILD_THREAD);
+        } else {
+            exit = true;
+        }
+    }
+    exit = true;
+    pthread_mutex_unlock(&init_mutex);
 }
 
 
@@ -137,4 +168,70 @@ void WlFFmpeg::resume() {
     if(audio != NULL){
         audio->resume();
     }
+}
+
+void WlFFmpeg::release() {
+    if(LOG_DEBUG){
+        LOGE("开始释放Ffmpeg")
+    }
+
+    if(playstatus->exit){
+        return;
+    }
+    if(LOG_DEBUG){
+        LOGE("开始释放Ffmpeg2");
+    }
+    playstatus->exit = true;
+
+    pthread_mutex_lock(&init_mutex);
+    int sleepCount = 0;
+    while(!exit){
+        if(sleepCount > 1000){
+            exit = true;
+        }
+        if(LOG_DEBUG){
+            LOGE("wait ffmpeg exit %d", sleepCount);
+        }
+        sleepCount ++;
+        av_usleep(1000 * 10); //暂停10毫秒
+    }
+
+    if(LOG_DEBUG){
+        LOGE("释放Audio");
+    }
+
+    if(audio != NULL){
+        audio->release();
+        delete(audio);
+        audio = NULL;
+    }
+
+    if(LOG_DEBUG){
+        LOGE("释放封装格式上下文")
+    }
+    if(pFormatCtx != NULL){
+        avformat_close_input(&pFormatCtx);
+        avformat_free_context(pFormatCtx);
+        pFormatCtx = NULL;
+    }
+    if(LOG_DEBUG){
+        LOGE("释放callJava");
+    }
+    if(callJava != NULL){
+        callJava = NULL;
+    }
+    if(LOG_DEBUG){
+        LOGE("释放playstatus");
+    }
+    if(playstatus != NULL){
+        playstatus = NULL;
+    }
+    pthread_mutex_unlock(&init_mutex);
+}
+
+WlFFmpeg::~WlFFmpeg() {
+
+    pthread_mutex_destroy(&init_mutex);
+
+
 }

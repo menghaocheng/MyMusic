@@ -70,3 +70,7 @@ void WlCallJava::onCallTimeInfo(int type, int curr, int total) {
         javaVM->DetachCurrentThread();
     }
 }
+
+WlCallJava::~WlCallJava() {
+
+}

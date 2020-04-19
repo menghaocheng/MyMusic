@@ -12,7 +12,7 @@ WlQueue::WlQueue(WlPlaystatus *playstatus) {
 }
 
 WlQueue::~WlQueue() {
-
+    clearAvpacket();
 }
 
 int WlQueue::putAvpacket(AVPacket *packet) {
@@ -57,6 +57,21 @@ int WlQueue::getQueueSize() {
     pthread_mutex_unlock(&mutexPacket);
 
     return size;
+}
+
+void WlQueue::clearAvpacket() {
+    pthread_cond_signal(&condPacket);
+    pthread_mutex_unlock(&mutexPacket);
+
+    while(!queuePacket.empty()){
+        AVPacket *packet = queuePacket.front();
+        queuePacket.pop();
+        av_packet_free(&packet);
+        av_free(packet);
+        packet = NULL;
+    }
+    pthread_mutex_unlock(&mutexPacket);
+
 }
 
 

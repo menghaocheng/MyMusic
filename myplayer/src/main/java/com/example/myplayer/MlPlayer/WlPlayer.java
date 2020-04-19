@@ -67,7 +67,7 @@ public class WlPlayer {
             MyLog.d("source not be empty");
             return;
         }
-        onCallLoad(true);
+        //onCallLoad(true);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -103,6 +103,15 @@ public class WlPlayer {
             wlOnPauseResumeListener.onPause(false);
         }
     }
+
+    public void stop(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                n_stop();
+            }
+        }).start();
+    }
     /**
      * c++回调java的方法
      */
@@ -134,6 +143,7 @@ public class WlPlayer {
     private native void n_start();
     private native void n_pause();
     private native void n_resume();
+    private native void n_stop();
 
 
 
