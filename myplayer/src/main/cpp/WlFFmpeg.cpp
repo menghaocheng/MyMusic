@@ -9,7 +9,7 @@ WlFFmpeg::WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *u
     this->playstatus = playstatus;
     this->callJava = callJava;
     this->url = url;
-	exit = false;
+    exit = false;
 	pthread_mutex_init(&init_mutex, NULL);
 }
 
@@ -26,7 +26,7 @@ void WlFFmpeg::parpared() {
 
 int avformat_callback(void *ctx){
     WlFFmpeg *fFmpeg = (WlFFmpeg*)ctx;
-    if(fFmpeg->playstatus->exit){
+    if(fFmpeg->playstatus == NULL || fFmpeg->playstatus->exit){
         return AVERROR_EOF;
     }
     return 0;
@@ -112,7 +112,6 @@ void WlFFmpeg::decodeFFmpegThread() {
             exit = true;
         }
     }
-    exit = true;
     pthread_mutex_unlock(&init_mutex);
 }
 
@@ -141,9 +140,12 @@ void WlFFmpeg::start() {
             av_packet_free(&avPacket);
             av_free(avPacket);
             while(playstatus != NULL && !playstatus->exit){
+                LOGE("HHHC:0====>");
                 if(audio->queue->getQueueSize() > 0){
+                    LOGE("HHHC:0.1====>%d", audio->queue->getQueueSize());
                     continue;
                 } else {
+				    LOGE("HHHC:0.2====>%d", audio->queue->getQueueSize());
                     playstatus->exit = true;
                     break;
                 }
@@ -151,7 +153,7 @@ void WlFFmpeg::start() {
 
         }
     }
-
+    exit = true;
     if (LOG_DEBUG) {
         LOGD("解码完成");
     }
@@ -181,21 +183,22 @@ void WlFFmpeg::release() {
     if(LOG_DEBUG){
         LOGE("开始释放Ffmpeg2");
     }
+    LOGE("HHHB:0====>");
     playstatus->exit = true;
-
+    LOGE("HHHB:1====>");
     pthread_mutex_lock(&init_mutex);
     int sleepCount = 0;
     while(!exit){
-        if(sleepCount > 1000){
+        if(sleepCount > 10){
             exit = true;
         }
         if(LOG_DEBUG){
             LOGE("wait ffmpeg exit %d", sleepCount);
         }
         sleepCount ++;
-        av_usleep(1000 * 10); //暂停10毫秒
+        av_usleep(1000 * 1000); //暂停10毫秒
     }
-
+    LOGE("HHHB:2====>%d", exit);
     if(LOG_DEBUG){
         LOGE("释放Audio");
     }
@@ -207,7 +210,7 @@ void WlFFmpeg::release() {
     }
 
     if(LOG_DEBUG){
-        LOGE("释放封装格式上下文")
+        LOGE("释放封装格式上下文");
     }
     if(pFormatCtx != NULL){
         avformat_close_input(&pFormatCtx);
@@ -232,6 +235,4 @@ void WlFFmpeg::release() {
 WlFFmpeg::~WlFFmpeg() {
 
     pthread_mutex_destroy(&init_mutex);
-
-
 }
