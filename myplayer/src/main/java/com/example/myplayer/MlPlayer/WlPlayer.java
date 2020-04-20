@@ -3,6 +3,7 @@ package com.example.myplayer.MlPlayer;
 import android.text.TextUtils;
 
 import com.example.myplayer.WlTimeInfoBean;
+import com.example.myplayer.listener.WlOnCompleteListener;
 import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
@@ -32,6 +33,7 @@ public class WlPlayer {
     private WlOnPauseResumeListener wlOnPauseResumeListener;
     private WlOnTimeInfoListener wlOnTimeInfoListener;
     private WlOnErrorListener wlOnErrorListener;
+    private WlOnCompleteListener wlOnCompleteListener;
 
     public WlPlayer(){}
 
@@ -66,6 +68,10 @@ public class WlPlayer {
 
     public void setWlOnErrorListener(WlOnErrorListener wlOnErrorListener) {
         this.wlOnErrorListener = wlOnErrorListener;
+    }
+
+    public void setWlOnCompleteListener(WlOnCompleteListener wlOnCompleteListener) {
+        this.wlOnCompleteListener = wlOnCompleteListener;
     }
 
     public void parpared(){
@@ -118,6 +124,10 @@ public class WlPlayer {
             }
         }).start();
     }
+
+    public void seek(int secds){
+        n_seek(secds);
+    }
     /**
      * c++回调java的方法
      */
@@ -151,11 +161,19 @@ public class WlPlayer {
         }
     }
 
+    public void onCallComplete(){
+        if(wlOnCompleteListener != null){
+            stop();
+            wlOnCompleteListener.onComplete();
+        }
+    }
+
     private native void n_parpared(String source);
     private native void n_start();
     private native void n_pause();
     private native void n_resume();
     private native void n_stop();
+    private native void n_seek(int secds);
 
 
 

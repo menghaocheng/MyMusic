@@ -11,6 +11,7 @@ class WlPlaystatus {
 public:
     bool exit = false;
     bool load = true;
+    bool seek = false;
 
 public:
     WlPlaystatus();

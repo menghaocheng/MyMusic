@@ -32,6 +32,9 @@ int WlAudio::resampleAudio() {
     data_size = 0;
     while(playstatus != NULL && !playstatus->exit){
 
+        if(playstatus->seek){
+            continue;
+        }
         if(queue->getQueueSize() == 0) { //加载中
             if(!playstatus->load){
                 playstatus->load = true;

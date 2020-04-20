@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.myplayer.WlTimeInfoBean;
+import com.example.myplayer.listener.WlOnCompleteListener;
 import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
@@ -77,6 +78,13 @@ public class MainActivity extends AppCompatActivity {
                 MyLog.d("code:" + code + ",msg:" + msg);
             }
         });
+
+        wlPlayer.setWlOnCompleteListener(new WlOnCompleteListener() {
+            @Override
+            public void onComplete() {
+                MyLog.d("播放完成了");
+            }
+        });
     }
 
 
@@ -84,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
     public void begin(View view){
         //wlPlayer.setSource("http://mpge.5nd.com/2015/2015-12-26/69708/1.mp3");
         //wlPlayer.setSource("http://downsc.chinaz.net/Files/DownLoad/sound1/202004/12723.mp3");
-        //wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
-        wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index12.m3u8");
+        wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
+        //wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
         wlPlayer.parpared();
     }
 
@@ -111,5 +119,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void stop(View view) {
         wlPlayer.stop();
+    }
+
+    public void seek(View view) {
+        wlPlayer.seek(260);
     }
 }

@@ -28,6 +28,8 @@ public:
     WlPlaystatus *playstatus = NULL;
     pthread_mutex_t init_mutex;
     bool exit = false;
+    int duration = 0;
+    pthread_mutex_t seek_mutex;
 public:
     WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url);
     ~WlFFmpeg();
@@ -41,6 +43,8 @@ public:
     void resume();
 
     void release();
+
+    void seek(int64_t secds);
 
 };
 
