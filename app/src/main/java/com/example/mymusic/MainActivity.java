@@ -124,4 +124,8 @@ public class MainActivity extends AppCompatActivity {
     public void seek(View view) {
         wlPlayer.seek(260);
     }
+
+    public void next(View view) {
+        wlPlayer.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+    }
 }

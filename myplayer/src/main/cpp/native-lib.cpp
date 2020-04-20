@@ -87,6 +87,10 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
     if(!nexit){
         return;
     }
+
+    jclass clz = env->GetObjectClass(thiz);
+    jmethodID jmid_next = env->GetMethodID(clz, "onCallNext", "()V");
+
     nexit = false;
     if(fFmpeg != NULL){
         fFmpeg->release();
@@ -102,6 +106,7 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
         }
     }
     nexit = true;
+    env->CallVoidMethod(thiz, jmid_next);
 }
 
 extern "C"

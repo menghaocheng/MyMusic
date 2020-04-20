@@ -26,7 +26,9 @@ public class WlPlayer {
 
     }
 
-    private String source; //数据源
+    private static String source; //数据源
+    private static boolean playNext = false;
+
     private static WlTimeInfoBean wlTimeInfoBean;
     private WlOnParparedListener wlOnParparedListener;
     private WlOnLoadListener wlOnLoadListener;
@@ -128,9 +130,13 @@ public class WlPlayer {
     public void seek(int secds){
         n_seek(secds);
     }
-    /**
-     * c++回调java的方法
-     */
+
+    public void playNext(String url){
+        source = url;
+        playNext = true;
+        stop();
+    }
+
     public void onCallParpared(){
         if(wlOnParparedListener != null){
             wlOnParparedListener.onParpared();
@@ -168,6 +174,12 @@ public class WlPlayer {
         }
     }
 
+    public void onCallNext(){
+        if(playNext){
+            playNext = false;
+            parpared();
+        }
+    }
     private native void n_parpared(String source);
     private native void n_start();
     private native void n_pause();
