@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.myplayer.WlTimeInfoBean;
+import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
@@ -70,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        wlPlayer.setWlOnErrorListener(new WlOnErrorListener() {
+            @Override
+            public void onError(int code, String msg) {
+                MyLog.d("code:" + code + ",msg:" + msg);
+            }
+        });
     }
 
 
@@ -78,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         //wlPlayer.setSource("http://mpge.5nd.com/2015/2015-12-26/69708/1.mp3");
         //wlPlayer.setSource("http://downsc.chinaz.net/Files/DownLoad/sound1/202004/12723.mp3");
         //wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
-        wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+        wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index12.m3u8");
         wlPlayer.parpared();
     }
 

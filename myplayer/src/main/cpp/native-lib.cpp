@@ -14,6 +14,8 @@ WlCallJava *callJava = NULL;
 WlFFmpeg *fFmpeg = NULL;
 WlPlaystatus *playstatus = NULL;
 
+bool nexit = true;
+
 extern "C"
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved){
     jint result = -1;
@@ -75,6 +77,10 @@ JNIEXPORT void JNICALL
 Java_com_example_myplayer_MlPlayer_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
 
     // TODO
+    if(!nexit){
+        return;
+    }
+    nexit = false;
     if(fFmpeg != NULL){
         fFmpeg->release();
         delete(fFmpeg);
@@ -88,4 +94,5 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
             playstatus = NULL;
         }
     }
+    nexit = true;
 }

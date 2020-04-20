@@ -45,6 +45,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("open url [%s] failed: %s", url, strerror(errno));
         }
+        callJava->onCallError(CHILD_THREAD, 1001, "can not open url");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -53,6 +54,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not find streams from %s", url);
         }
+        callJava->onCallError(CHILD_THREAD, 1002, "can not find streams from url");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -73,6 +75,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not find decoder");
         }
+        callJava->onCallError(CHILD_THREAD, 1003, "can not find decoder");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -83,6 +86,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not alloc new decodectx");
         }
+        callJava->onCallError(CHILD_THREAD, 1004, "can not alloc new decodectx");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -92,6 +96,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not fill decodecctx");
         }
+        callJava->onCallError(CHILD_THREAD, 1005, "can not fill decodecct");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -101,6 +106,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not open audio streams");
         }
+        callJava->onCallError(CHILD_THREAD, 1006, "can not open audio streams");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -140,17 +146,14 @@ void WlFFmpeg::start() {
             av_packet_free(&avPacket);
             av_free(avPacket);
             while(playstatus != NULL && !playstatus->exit){
-                LOGE("HHHC:0====>");
                 if(audio->queue->getQueueSize() > 0){
-                    LOGE("HHHC:0.1====>%d", audio->queue->getQueueSize());
                     continue;
                 } else {
-				    LOGE("HHHC:0.2====>%d", audio->queue->getQueueSize());
                     playstatus->exit = true;
                     break;
                 }
             }
-
+			break;
         }
     }
     exit = true;
@@ -183,9 +186,8 @@ void WlFFmpeg::release() {
     if(LOG_DEBUG){
         LOGE("开始释放Ffmpeg2");
     }
-    LOGE("HHHB:0====>");
     playstatus->exit = true;
-    LOGE("HHHB:1====>");
+
     pthread_mutex_lock(&init_mutex);
     int sleepCount = 0;
     while(!exit){
@@ -198,7 +200,6 @@ void WlFFmpeg::release() {
         sleepCount ++;
         av_usleep(1000 * 1000); //暂停10毫秒
     }
-    LOGE("HHHB:2====>%d", exit);
     if(LOG_DEBUG){
         LOGE("释放Audio");
     }

@@ -3,6 +3,7 @@ package com.example.myplayer.MlPlayer;
 import android.text.TextUtils;
 
 import com.example.myplayer.WlTimeInfoBean;
+import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
@@ -30,6 +31,7 @@ public class WlPlayer {
     private WlOnLoadListener wlOnLoadListener;
     private WlOnPauseResumeListener wlOnPauseResumeListener;
     private WlOnTimeInfoListener wlOnTimeInfoListener;
+    private WlOnErrorListener wlOnErrorListener;
 
     public WlPlayer(){}
 
@@ -60,6 +62,10 @@ public class WlPlayer {
 
     public void setWlOnTimeInfoListener(WlOnTimeInfoListener wlOnTimeInfoListener) {
         this.wlOnTimeInfoListener = wlOnTimeInfoListener;
+    }
+
+    public void setWlOnErrorListener(WlOnErrorListener wlOnErrorListener) {
+        this.wlOnErrorListener = wlOnErrorListener;
     }
 
     public void parpared(){
@@ -138,6 +144,12 @@ public class WlPlayer {
         }
     }
 
+    public void onCallError(int code, String msg){
+        if(wlOnErrorListener != null){
+            stop();
+            wlOnErrorListener.onError(code, msg);
+        }
+    }
 
     private native void n_parpared(String source);
     private native void n_start();
