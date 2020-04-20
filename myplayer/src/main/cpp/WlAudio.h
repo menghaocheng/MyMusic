@@ -42,6 +42,8 @@ public:
     double now_time; //当前frame时间
     double last_time; //上一次调用时间
 
+    int volumePercent = 100;
+
     // 引擎接口
     SLObjectItf engineObject = NULL;
     SLEngineItf engineEngine = NULL;
@@ -54,6 +56,7 @@ public:
     //pcm
     SLObjectItf pcmPlayerObject = NULL;
     SLPlayItf pcmPlayerPlay = NULL;
+    SLVolumeItf pcmVolumePlay = NULL;
 
     //缓冲器队列接口
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
@@ -77,6 +80,7 @@ public:
 
     void release();
 
+    void setVolume(int percent);
 
 };
 

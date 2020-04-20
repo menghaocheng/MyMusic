@@ -117,3 +117,22 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1seek(JNIEnv *env, jobject thiz, j
         fFmpeg->seek(secds);
     }
 }
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1duration(JNIEnv *env, jobject thiz) {
+    // TODO
+    if(fFmpeg != NULL){
+        return fFmpeg->duration;
+    }
+    return 0;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1volume(JNIEnv *env, jobject thiz, jint percent) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->setVolume(percent);
+    }
+}

@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.myplayer.WlTimeInfoBean;
@@ -24,13 +26,25 @@ public class MainActivity extends AppCompatActivity {
 
     private WlPlayer wlPlayer;
     private TextView tvTime;
+    private TextView tvVolume;
+    private SeekBar seekBarSeek;
+    private SeekBar seekBarVolume;
+    private int position = 0;
+    private boolean isSeekBar = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tvTime = findViewById(R.id.tv_time);
+        seekBarSeek = findViewById(R.id.seekbar_seek);
+        seekBarVolume = findViewById(R.id.seekbar_volume);
+        tvVolume = findViewById(R.id.tv_volume);
         wlPlayer = new WlPlayer();
+        wlPlayer.setVolume(50);
+        tvVolume.setText("音量：" + wlPlayer.getVolumePercent() + "%");
+        seekBarVolume.setProgress(wlPlayer.getVolumePercent());
         wlPlayer.setWlOnParparedListener(new WlOnParparedListener() {
             @Override
             public void onParpared() {
@@ -85,7 +99,50 @@ public class MainActivity extends AppCompatActivity {
                 MyLog.d("播放完成了");
             }
         });
+
+
+        seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(wlPlayer.getDuration() > 0 && isSeekBar){
+                    position = wlPlayer.getDuration() * progress /100;
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isSeekBar = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                wlPlayer.seek(position);
+                isSeekBar = false;
+            }
+        });
+
+        seekBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                wlPlayer.setVolume(progress);
+                tvVolume.setText("音量：" + wlPlayer.getVolumePercent() + "%");
+                Log.d("ywl5320", "progress is " + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
     }
+
+
 
 
 
@@ -110,9 +167,13 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if(msg.what == 1){
-                WlTimeInfoBean wlTimeInfoBean = (WlTimeInfoBean) msg.obj;
-                tvTime.setText(WlTimeUtil.secdsToDateFormat(wlTimeInfoBean.getTotalTime(), wlTimeInfoBean.getTotalTime())
-                + "/" + WlTimeUtil.secdsToDateFormat(wlTimeInfoBean.getCurrentTime(), wlTimeInfoBean.getTotalTime()));
+                if(!isSeekBar){
+                    WlTimeInfoBean wlTimeInfoBean = (WlTimeInfoBean) msg.obj;
+                    tvTime.setText(WlTimeUtil.secdsToDateFormat(wlTimeInfoBean.getTotalTime(), wlTimeInfoBean.getTotalTime())
+                            + "/" + WlTimeUtil.secdsToDateFormat(wlTimeInfoBean.getCurrentTime(), wlTimeInfoBean.getTotalTime()));
+                    seekBarSeek.setProgress(wlTimeInfoBean.getCurrentTime() * 100 / wlTimeInfoBean.getTotalTime());
+                }
+
             }
         }
     };

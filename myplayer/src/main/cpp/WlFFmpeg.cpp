@@ -259,3 +259,9 @@ void WlFFmpeg::seek(int64_t secds) {
         }
     }
 }
+
+void WlFFmpeg::setVolume(int percent) {
+    if(audio != NULL){
+        audio->setVolume(percent);
+    }
+}
