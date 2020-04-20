@@ -267,7 +267,7 @@ void WlAudio::resume() {
 }
 
 void WlAudio::release() {
-    //stop();
+    stop();
     if(queue != NULL){
         delete(queue);
         queue = NULL;

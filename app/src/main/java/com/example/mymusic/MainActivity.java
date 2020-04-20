@@ -77,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
     public void begin(View view){
         //wlPlayer.setSource("http://mpge.5nd.com/2015/2015-12-26/69708/1.mp3");
         //wlPlayer.setSource("http://downsc.chinaz.net/Files/DownLoad/sound1/202004/12723.mp3");
-        wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
-        //wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");  //停止播放会崩溃
+        //wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
+        wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
         wlPlayer.parpared();
     }
 
