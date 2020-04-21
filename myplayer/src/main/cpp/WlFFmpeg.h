@@ -48,6 +48,8 @@ public:
 
     void setVolume(int percent);
 
+    void setMute(int mute);
+
 };
 
 

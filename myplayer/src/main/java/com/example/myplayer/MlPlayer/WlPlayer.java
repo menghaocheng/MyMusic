@@ -10,6 +10,7 @@ import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.log.MyLog;
+import com.example.myplayer.muteenum.MuteEnum;
 
 public class WlPlayer {
 
@@ -31,6 +32,7 @@ public class WlPlayer {
     private static boolean playNext = false;
     private static int duration = -1;
     private static int volumePercent = 100;
+    private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private WlOnParparedListener wlOnParparedListener;
     private WlOnLoadListener wlOnLoadListener;
     private WlOnPauseResumeListener wlOnPauseResumeListener;
@@ -100,6 +102,8 @@ public class WlPlayer {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                setVolume(volumePercent);
+                setMute(muteEnum);
                 n_start();
             }
         }).start();
@@ -120,6 +124,7 @@ public class WlPlayer {
     }
 
     public void stop(){
+        wlTimeInfoBean = null;
         duration = -1;
         new Thread(new Runnable() {
             @Override
@@ -157,8 +162,19 @@ public class WlPlayer {
         return volumePercent;
     }
 
-    public void onCallParpared(){
-        if(wlOnParparedListener != null){
+    public void setMute(MuteEnum mute){
+        muteEnum = mute;
+        n_mute(mute.getValue());
+    }
+
+
+    /**
+     * c++回调java的方法
+     */
+    public void onCallParpared()
+    {
+        if(wlOnParparedListener != null)
+        {
             wlOnParparedListener.onParpared();
         }
     }
@@ -200,6 +216,8 @@ public class WlPlayer {
             parpared();
         }
     }
+
+
     private native void n_parpared(String source);
     private native void n_start();
     private native void n_pause();
@@ -207,8 +225,8 @@ public class WlPlayer {
     private native void n_stop();
     private native void n_seek(int secds);
     private native int n_duration();
-
     private native void n_volume(int percent);
+    private native void n_mute(int mute);
 
 
 

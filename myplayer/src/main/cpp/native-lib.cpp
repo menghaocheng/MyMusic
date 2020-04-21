@@ -136,3 +136,12 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1volume(JNIEnv *env, jobject thiz,
         fFmpeg->setVolume(percent);
     }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1mute(JNIEnv *env, jobject thiz, jint mute) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->setMute(mute);
+    }
+}

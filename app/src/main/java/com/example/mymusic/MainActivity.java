@@ -20,6 +20,7 @@ import com.example.myplayer.listener.WlOnPauseResumeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.log.MyLog;
 import com.example.myplayer.MlPlayer.WlPlayer;
+import com.example.myplayer.muteenum.MuteEnum;
 import com.example.myplayer.util.WlTimeUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         tvVolume = findViewById(R.id.tv_volume);
         wlPlayer = new WlPlayer();
         wlPlayer.setVolume(50);
+        wlPlayer.setMute(MuteEnum.MUTE_LEFT);
         tvVolume.setText("音量：" + wlPlayer.getVolumePercent() + "%");
         seekBarVolume.setProgress(wlPlayer.getVolumePercent());
         wlPlayer.setWlOnParparedListener(new WlOnParparedListener() {
@@ -143,9 +145,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
     public void begin(View view){
         //wlPlayer.setSource("http://mpge.5nd.com/2015/2015-12-26/69708/1.mp3");
         //wlPlayer.setSource("http://downsc.chinaz.net/Files/DownLoad/sound1/202004/12723.mp3");
@@ -188,5 +187,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void next(View view) {
         wlPlayer.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+    }
+
+    public void left(View view) {
+        wlPlayer.setMute(MuteEnum.MUTE_LEFT);
+    }
+
+    public void right(View view) {
+        wlPlayer.setMute(MuteEnum.MUTE_RIGHT);
+    }
+
+    public void center(View view) {
+        wlPlayer.setMute(MuteEnum.MUTE_CENTER);
     }
 }
