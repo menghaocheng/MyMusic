@@ -145,3 +145,22 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1mute(JNIEnv *env, jobject thiz, j
         fFmpeg->setMute(mute);
     }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1pitch(JNIEnv *env, jobject thiz, jfloat pitch) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->setPitch(pitch);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1speed(JNIEnv *env, jobject thiz, jfloat speed) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->setSpeed(speed);
+    }
+}
+

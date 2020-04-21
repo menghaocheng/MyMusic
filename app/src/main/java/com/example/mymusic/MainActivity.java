@@ -1,11 +1,12 @@
 package com.example.mymusic;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
+
 import android.os.Handler;
 import android.os.Message;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
@@ -19,8 +20,8 @@ import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.log.MyLog;
-import com.example.myplayer.MlPlayer.WlPlayer;
 import com.example.myplayer.muteenum.MuteEnum;
+import com.example.myplayer.MlPlayer.WlPlayer;
 import com.example.myplayer.util.WlTimeUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         tvVolume = findViewById(R.id.tv_volume);
         wlPlayer = new WlPlayer();
         wlPlayer.setVolume(50);
+        wlPlayer.setPitch(1.5f);
+        wlPlayer.setSpeed(1.5f);
         wlPlayer.setMute(MuteEnum.MUTE_LEFT);
         tvVolume.setText("音量：" + wlPlayer.getVolumePercent() + "%");
         seekBarVolume.setProgress(wlPlayer.getVolumePercent());
@@ -54,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
                 wlPlayer.start();
             }
         });
-
         wlPlayer.setWlOnLoadListener(new WlOnLoadListener() {
             @Override
             public void onLoad(boolean load) {
@@ -199,5 +201,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void center(View view) {
         wlPlayer.setMute(MuteEnum.MUTE_CENTER);
+    }
+
+    public void speed(View view) {
+        wlPlayer.setSpeed(1.5f);
+        wlPlayer.setPitch(1.0f);
+    }
+
+    public void pitch(View view) {
+        wlPlayer.setPitch(1.5f);
+        wlPlayer.setSpeed(1.0f);
+    }
+
+    public void speedpitch(View view) {
+        wlPlayer.setSpeed(1.5f);
+        wlPlayer.setPitch(1.5f);
+    }
+
+    public void normalspeedpitch(View view) {
+        wlPlayer.setSpeed(1.0f);
+        wlPlayer.setPitch(1.0f);
     }
 }

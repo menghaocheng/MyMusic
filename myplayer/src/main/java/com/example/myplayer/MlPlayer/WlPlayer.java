@@ -32,6 +32,8 @@ public class WlPlayer {
     private static boolean playNext = false;
     private static int duration = -1;
     private static int volumePercent = 100;
+    private static float speed = 1.0f;
+    private static float pitch = 1.0f;
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private WlOnParparedListener wlOnParparedListener;
     private WlOnLoadListener wlOnLoadListener;
@@ -104,6 +106,8 @@ public class WlPlayer {
             public void run() {
                 setVolume(volumePercent);
                 setMute(muteEnum);
+                setPitch(pitch);
+                setSpeed(speed);
                 n_start();
             }
         }).start();
@@ -167,6 +171,16 @@ public class WlPlayer {
         n_mute(mute.getValue());
     }
 
+    public void setPitch(float p){
+        pitch = p;
+        n_pitch(pitch);
+    }
+
+    public void setSpeed(float s){
+        speed = s;
+        n_speed(speed);
+    }
+
 
     /**
      * c++回调java的方法
@@ -227,6 +241,8 @@ public class WlPlayer {
     private native int n_duration();
     private native void n_volume(int percent);
     private native void n_mute(int mute);
+    private native void n_pitch(float pitch);
+    private native void n_speed(float speed);
 
 
 

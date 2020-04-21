@@ -4,6 +4,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
@@ -13,21 +14,19 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
 
-
         externalNativeBuild {
             cmake {
-                //cppFlags ""
                 cppFlags "-frtti -fexceptions"
                 abiFilters 'armeabi-v7a', "x86"
             }
-
         }
 
-        sourceSets{
-            main{
+        sourceSets {
+            main {
                 jniLibs.srcDirs = ['src/main/jniLibs']
             }
         }
+
     }
 
     buildTypes {

@@ -86,9 +86,9 @@ void WlFFmpeg::decodeFFmpegThread() {
     audio->avCodecContext = avcodec_alloc_context3(dec);
     if(!audio->avCodecContext){
         if(LOG_DEBUG){
-            LOGE("can not alloc new decodectx");
+            LOGE("can not alloc new decodecctx");
         }
-        callJava->onCallError(CHILD_THREAD, 1004, "can not alloc new decodectx");
+        callJava->onCallError(CHILD_THREAD, 1004, "can not alloc new decodecctx");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -98,7 +98,7 @@ void WlFFmpeg::decodeFFmpegThread() {
         if(LOG_DEBUG){
             LOGE("can not fill decodecctx");
         }
-        callJava->onCallError(CHILD_THREAD, 1005, "can not fill decodecct");
+        callJava->onCallError(CHILD_THREAD, 1005, "can not fill decodecctx");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -185,7 +185,7 @@ void WlFFmpeg::resume() {
 
 void WlFFmpeg::release() {
     if(LOG_DEBUG){
-        LOGE("开始释放Ffmpeg")
+        LOGE("开始释放Ffmpeg");
     }
     
     playstatus->exit = true;
@@ -236,8 +236,8 @@ void WlFFmpeg::release() {
 }
 
 WlFFmpeg::~WlFFmpeg() {
-
     pthread_mutex_destroy(&init_mutex);
+    pthread_mutex_destroy(&seek_mutex);
 }
 
 void WlFFmpeg::seek(int64_t secds) {
@@ -271,4 +271,18 @@ void WlFFmpeg::setMute(int mute) {
         audio->setMute(mute);
     }
 
+}
+
+void WlFFmpeg::setPitch(float pitch) {
+
+    if(audio != NULL){
+        audio->setPitch(pitch);
+    }
+}
+
+void WlFFmpeg::setSpeed(float speed) {
+
+    if(audio != NULL){
+        audio->setSpeed(speed);
+    }
 }
