@@ -19,6 +19,7 @@ import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
+import com.example.myplayer.listener.WlOnValumeDBListener;
 import com.example.myplayer.log.MyLog;
 import com.example.myplayer.muteenum.MuteEnum;
 import com.example.myplayer.MlPlayer.WlPlayer;
@@ -105,6 +106,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        wlPlayer.setWlOnValumeDBListener(new WlOnValumeDBListener() {
+            @Override
+            public void onDbValue(int db) {
+                MyLog.d("db is: " + db);
+            }
+        });
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {

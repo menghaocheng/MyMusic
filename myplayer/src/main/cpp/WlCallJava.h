@@ -26,6 +26,7 @@ public:
     jmethodID jmid_timeinfo;
     jmethodID jmid_error;
     jmethodID jmid_complete;
+    jmethodID jmid_valuedb;
 
 public:
     WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj);
@@ -40,6 +41,8 @@ public:
     void onCallError(int type, int code, char *msg);
 
     void onCallComplete(int type);
+
+    void onCallValueDB(int type, int db);
 
 };
 

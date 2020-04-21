@@ -110,7 +110,7 @@ public:
 
     void setSpeed(float speed);
 
-
+    int getPCMDB(char *pcmdata, size_t pcmsize);
 
 };
 
