@@ -55,6 +55,9 @@ public:
     float speed = 1.0f;
 
     bool isRecordPcm = false;
+    bool readFrameFinished = true;
+
+
 
     // 引擎接口
     SLObjectItf engineObject = NULL;

@@ -132,14 +132,14 @@ void WlFFmpeg::start() {
     }
     audio->play();
 
-
+    int count = 0;
     while (playstatus != NULL && !playstatus->exit) {
         if(playstatus->seek){
             av_usleep(1000 * 100);
             continue;
         }
 
-        if(audio->queue->getQueueSize() > 100){
+        if(audio->queue->getQueueSize() > 20){
             av_usleep(1000 * 100);
             continue;
         }
@@ -147,6 +147,8 @@ void WlFFmpeg::start() {
         AVPacket *avPacket = av_packet_alloc();
         if (av_read_frame(pFormatCtx, avPacket) == 0) {
             if (avPacket->stream_index == audio->streamIndex) {
+                count++;
+                LOGE("解码第 %d 帧", count);
                 audio->queue->putAvpacket(avPacket);
             } else {
                 av_packet_free(&avPacket);
@@ -256,6 +258,7 @@ void WlFFmpeg::seek(int64_t secds) {
             audio->last_time = 0;
             pthread_mutex_lock(&seek_mutex);
             int64_t rel = secds * AV_TIME_BASE;
+            avcodec_flush_buffers(audio->avCodecContext);
             avformat_seek_file(pFormatCtx, -1, INT64_MIN, rel, INT64_MAX, 0);
             pthread_mutex_unlock(&seek_mutex);
             playstatus->seek = false;

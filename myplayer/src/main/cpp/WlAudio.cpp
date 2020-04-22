@@ -60,23 +60,27 @@ int WlAudio::resampleAudio(void **pcmbuf) {
                 callJava->onCallLoad(CHILD_THREAD, false);
             }
         }
-        avPacket = av_packet_alloc();
-        if(queue->getAvpacket(avPacket) != 0){
-            av_packet_free(&avPacket);
-            av_free(avPacket);
-            avPacket = NULL;
-            continue;
+        if(readFrameFinished){
+            avPacket = av_packet_alloc();
+            if(queue->getAvpacket(avPacket) != 0){
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                avPacket = NULL;
+                continue;
+            }
+            ret = avcodec_send_packet(avCodecContext, avPacket);
+            if(ret != 0){
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                avPacket = NULL;
+                continue;
+            }
         }
-        ret = avcodec_send_packet(avCodecContext, avPacket);
-        if(ret != 0){
-            av_packet_free(&avPacket);
-            av_free(avPacket);
-            avPacket = NULL;
-            continue;
-        }
+
         avFrame = av_frame_alloc();
         ret = avcodec_receive_frame(avCodecContext, avFrame);
         if(ret == 0){
+            readFrameFinished = false;
             if(avFrame->channels && avFrame->channel_layout == 0){
                 avFrame->channel_layout = av_get_default_channel_layout(avFrame->channels);
             }else if(avFrame->channels == 0 && avFrame->channel_layout > 0){
@@ -103,6 +107,7 @@ int WlAudio::resampleAudio(void **pcmbuf) {
                 av_free(avFrame);
                 avFrame = NULL;
                 swr_free(&swr_ctx);
+                readFrameFinished = true;
                 continue;
             }
 
@@ -121,16 +126,14 @@ int WlAudio::resampleAudio(void **pcmbuf) {
                 now_time = clock;
             }
             clock = now_time;
-            if(pcmbuf) *pcmbuf = buffer;
-            av_packet_free(&avPacket);
-            av_free(avPacket);
-            avPacket = NULL;
+            *pcmbuf = buffer;
             av_frame_free(&avFrame);
             av_free(avFrame);
             avFrame = NULL;
             swr_free(&swr_ctx);
             break;
         } else{
+            readFrameFinished = true;
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
