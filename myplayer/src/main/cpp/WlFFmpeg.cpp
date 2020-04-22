@@ -135,10 +135,12 @@ void WlFFmpeg::start() {
 
     while (playstatus != NULL && !playstatus->exit) {
         if(playstatus->seek){
+            av_usleep(1000 * 100);
             continue;
         }
 
-        if(audio->queue->getQueueSize() > 40){
+        if(audio->queue->getQueueSize() > 100){
+            av_usleep(1000 * 100);
             continue;
         }
 
@@ -155,6 +157,7 @@ void WlFFmpeg::start() {
             av_free(avPacket);
             while(playstatus != NULL && !playstatus->exit){
                 if(audio->queue->getQueueSize() > 0){
+                    av_usleep(1000 * 100);
                     continue;
                 } else {
                     playstatus->exit = true;
@@ -193,14 +196,14 @@ void WlFFmpeg::release() {
     pthread_mutex_lock(&init_mutex);
     int sleepCount = 0;
     while(!exit){
-        if(sleepCount > 10){
+        if(sleepCount > 100){
             exit = true;
         }
         if(LOG_DEBUG){
             LOGE("wait ffmpeg exit %d", sleepCount);
         }
         sleepCount ++;
-        av_usleep(1000 * 1000); //暂停10毫秒
+        av_usleep(1000 * 100); //暂停10毫秒
     }
     if(LOG_DEBUG){
         LOGE("释放Audio");

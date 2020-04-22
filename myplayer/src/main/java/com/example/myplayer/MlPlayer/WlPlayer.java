@@ -339,12 +339,6 @@ public class WlPlayer {
 
 
     private void encodecPcmToAAc(int size, byte[] buffer){
-
-        //if(initmediacodec == false){
-        //    MyLog.e("HHHC:0====>");
-        //    return;
-        //}
-
         if(buffer != null && encoder != null){
             recordTime += size * 1.0 / (audioSamplerate * 2 * (16/8));
 

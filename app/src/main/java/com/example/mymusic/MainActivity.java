@@ -28,8 +28,8 @@ import com.example.myplayer.util.WlTimeUtil;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity {
 
+public class MainActivity extends AppCompatActivity {
     private WlPlayer wlPlayer;
     private TextView tvTime;
     private TextView tvVolume;
