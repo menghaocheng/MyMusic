@@ -11,6 +11,7 @@ import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
+import com.example.myplayer.listener.WlOnPcmInfoListener;
 import com.example.myplayer.listener.WlOnRecordTimeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.listener.WlOnValumeDBListener;
@@ -53,9 +54,10 @@ public class WlPlayer {
     private WlOnCompleteListener wlOnCompleteListener;
     private WlOnValumeDBListener wlOnValumeDBListener;
     private WlOnRecordTimeListener wlOnRecordTimeListener;
+    private WlOnPcmInfoListener wlOnPcmInfoListener;
 
-    public WlPlayer(){}
-
+    public WlPlayer(){
+	}
 
     /**
      * 设置数据源
@@ -99,6 +101,10 @@ public class WlPlayer {
 
     public void setWlOnRecordTimeListener(WlOnRecordTimeListener wlOnRecordTimeListener) {
         this.wlOnRecordTimeListener = wlOnRecordTimeListener;
+    }
+
+    public void setWlOnPcmInfoListener(WlOnPcmInfoListener wlOnPcmInfoListener) {
+        this.wlOnPcmInfoListener = wlOnPcmInfoListener;
     }
 
     public void parpared(){
@@ -232,6 +238,15 @@ public class WlPlayer {
         MyLog.d("继续录制");
     }
 
+    public void cutAudioPlay(int start_time, int end_time, boolean showPcm){
+        if(n_cutaudioplay(start_time, end_time, showPcm)){
+            start();
+        } else {
+            stop();
+            onCallError(2001, "cutaudio params is wrong");
+        }
+    }
+
     /**
      * c++回调java的方法
      */
@@ -268,8 +283,8 @@ public class WlPlayer {
     }
 
     public void onCallComplete(){
+	    stop();
         if(wlOnCompleteListener != null){
-            stop();
             wlOnCompleteListener.onComplete();
         }
     }
@@ -287,6 +302,17 @@ public class WlPlayer {
         }
     }
 
+    public void onCallPcmInfo(byte[] buffer, int buffersize){
+        if(wlOnPcmInfoListener != null){
+            wlOnPcmInfoListener.onPcmInfo(buffer, buffersize);
+        }
+    }
+
+    public void onCallPcmRate(int samplerate){
+        if(wlOnPcmInfoListener != null){
+            wlOnPcmInfoListener.onPcmRate(samplerate, 16, 2);
+        }
+    }
 
 
     private native void n_parpared(String source);
@@ -302,6 +328,8 @@ public class WlPlayer {
     private native void n_speed(float speed);
     private native int n_samplerate();
     private native void n_startstoprecord(boolean start);
+
+    private native boolean n_cutaudioplay(int start_time, int end_time, boolean show_pcm);
 
     //mediacodec
 

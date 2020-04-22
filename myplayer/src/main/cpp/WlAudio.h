@@ -85,6 +85,11 @@ public:
     int nb = 0;
     int num = 0;
 
+    bool isCut = false;
+    int end_time = 0;
+    bool showPcm = false;
+
+
 public:
     WlAudio(WlPlaystatus *playstatus, int sample_rate, WlCallJava *callJava);
     ~WlAudio();
@@ -117,6 +122,7 @@ public:
     int getPCMDB(char *pcmdata, size_t pcmsize);
 
     void startStopRecord(bool start);
+
 
 
 };

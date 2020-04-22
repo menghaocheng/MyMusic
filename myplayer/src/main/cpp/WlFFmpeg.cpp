@@ -69,6 +69,7 @@ void WlFFmpeg::decodeFFmpegThread() {
                 audio->duration = pFormatCtx->duration / AV_TIME_BASE;
                 audio->time_base = pFormatCtx->streams[i]->time_base;
                 duration = audio->duration;
+                callJava->onCallPcmRate(audio->sample_rate);
             }
         }
     }
@@ -305,4 +306,15 @@ void WlFFmpeg::startStopRecord(bool start) {
         audio->startStopRecord(start);
     }
 
+}
+
+bool WlFFmpeg::cutAudioPlay(int start_time, int end_time, bool showPcm) {
+    if(start_time >= 0 && end_time <= duration && start_time < end_time){
+        audio->isCut = true;
+        audio->end_time = end_time;
+        audio->showPcm = showPcm;
+        seek(start_time);
+        return true;
+    }
+    return false;
 }

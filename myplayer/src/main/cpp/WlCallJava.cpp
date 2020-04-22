@@ -25,6 +25,8 @@ WlCallJava::WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj) {
     jmid_complete = env->GetMethodID(jlz, "onCallComplete", "()V");
     jmid_valuedb = env->GetMethodID(jlz, "onCallValueDB", "(I)V");
     jmid_pcmtoaac = env->GetMethodID(jlz, "encodecPcmToAAc", "(I[B)V");
+    jmid_pcminfo = env->GetMethodID(jlz, "onCallPcmInfo", "([BI)V");
+    jmid_pcmrate = env->GetMethodID(jlz, "onCallPcmRate", "(I)V");
 
 }
 
@@ -144,7 +146,7 @@ void WlCallJava::onCallPcmToAAc(int type, int size, void *buffer) {
         JNIEnv *jniEnv;
         if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
             if(LOG_DEBUG){
-                LOGE("call onCallValueDB wrong");
+                LOGE("call onCallPcmToAAc wrong");
             }
             return;
         }
@@ -154,6 +156,39 @@ void WlCallJava::onCallPcmToAAc(int type, int size, void *buffer) {
         jniEnv->CallVoidMethod(jobj, jmid_pcmtoaac, size, jbuffer);
 
         jniEnv->DeleteLocalRef(jbuffer);
+
         javaVM->DetachCurrentThread();
     }
+}
+
+void WlCallJava::onCallPcmInfo(void *buffer, int size) {
+    JNIEnv *jniEnv;
+    if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
+        if(LOG_DEBUG){
+            LOGE("call onCallPcmInfo wrong");
+        }
+        return;
+    }
+    jbyteArray jbuffer = jniEnv->NewByteArray(size);
+    jniEnv->SetByteArrayRegion(jbuffer, 0, size, static_cast<const jbyte *>(buffer));
+
+    jniEnv->CallVoidMethod(jobj, jmid_pcminfo, jbuffer, size);
+
+    jniEnv->DeleteLocalRef(jbuffer);
+
+    javaVM->DetachCurrentThread();
+}
+
+void WlCallJava::onCallPcmRate(int samplerate) {
+    JNIEnv *jniEnv;
+    if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
+        if(LOG_DEBUG){
+            LOGE("call onCallPcmRate wrong");
+        }
+        return;
+    }
+
+    jniEnv->CallVoidMethod(jobj, jmid_pcmrate, samplerate);
+
+    javaVM->DetachCurrentThread();
 }

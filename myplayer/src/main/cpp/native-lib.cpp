@@ -173,7 +173,9 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1samplerate(JNIEnv *env, jobject t
     }
     return 0;
 
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_myplayer_MlPlayer_WlPlayer_n_1startstoprecord(JNIEnv *env, jobject thiz,
                                                                jboolean start) {
@@ -181,4 +183,17 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1startstoprecord(JNIEnv *env, jobj
     if(fFmpeg != NULL){
         fFmpeg->startStopRecord(start);
     }
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1cutaudioplay(JNIEnv *env, jobject thiz,
+                                                            jint start_time, jint end_time,
+                                                            jboolean show_pcm) {
+    // TODO
+    if(fFmpeg != NULL){
+        return fFmpeg->cutAudioPlay(start_time, end_time, show_pcm);
+    }
+
+    return false;
 }

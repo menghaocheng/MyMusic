@@ -9,6 +9,12 @@ WlAudio::WlAudio(WlPlaystatus *playstatus, int sample_rate, WlCallJava *callJava
     this->callJava = callJava;
     this->playstatus = playstatus;
     this->sample_rate = sample_rate;
+
+    this->isCut = false;
+    this->end_time = 0;
+    this->showPcm = false;
+
+
     queue = new WlQueue(playstatus);
     buffer = (uint8_t *) av_malloc(sample_rate * 2 * 2);
 
@@ -198,6 +204,17 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context){
             wlAudio->callJava->onCallValueDB(CHILD_THREAD,
                     wlAudio->getPCMDB(reinterpret_cast<char *>(wlAudio->sampleBuffer), buffersize * 4));
             (* wlAudio-> pcmBufferQueue)->Enqueue( wlAudio->pcmBufferQueue, (char *) wlAudio->sampleBuffer, buffersize * 2 * 2);
+
+            if(wlAudio->isCut){
+                if(wlAudio->showPcm){
+                    //
+                    wlAudio->callJava->onCallPcmInfo(wlAudio->sampleBuffer, buffersize * 2 * 2);
+                }
+                if(wlAudio->clock > wlAudio->end_time){
+                    LOGE("裁剪退出...");
+                    wlAudio->playstatus->exit = true;
+                }
+            }
         }
     }
 }
@@ -477,5 +494,7 @@ int WlAudio::getPCMDB(char *pcmdata, size_t pcmsize) {
 }
 
 void WlAudio::startStopRecord(bool start) {
+
     this->isRecordPcm = start;
+
 }
