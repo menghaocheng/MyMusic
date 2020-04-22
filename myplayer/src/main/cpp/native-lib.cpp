@@ -173,4 +173,12 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1samplerate(JNIEnv *env, jobject t
     }
     return 0;
 
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1startstoprecord(JNIEnv *env, jobject thiz,
+                                                               jboolean start) {
+    // TODO
+    if(fFmpeg != NULL){
+        fFmpeg->startStopRecord(start);
+    }
 }

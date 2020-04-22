@@ -235,4 +235,16 @@ public class MainActivity extends AppCompatActivity {
     public void start_record(View view) {
         wlPlayer.startRecord(new File("/mnt/sdcard/Music/textplay.aac"));
     }
+
+    public void pause_record(View view) {
+        wlPlayer.pauseRecord();
+    }
+
+    public void goon_record(View view) {
+        wlPlayer.resumeRecord();
+    }
+
+    public void stop_record(View view) {
+        wlPlayer.stopRecord();
+    }
 }

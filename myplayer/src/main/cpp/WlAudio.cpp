@@ -185,7 +185,10 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context){
                 //回调应用层
                 wlAudio->callJava->onCallTimeInfo(CHILD_THREAD, wlAudio->clock, wlAudio->duration);
             }
-            wlAudio->callJava->onCallPcmToAAc(CHILD_THREAD, buffersize * 2 * 2, wlAudio->sampleBuffer);
+            if(wlAudio->isRecordPcm){
+                wlAudio->callJava->onCallPcmToAAc(CHILD_THREAD, buffersize * 2 * 2, wlAudio->sampleBuffer);
+            }
+
             wlAudio->callJava->onCallValueDB(CHILD_THREAD,
                     wlAudio->getPCMDB(reinterpret_cast<char *>(wlAudio->sampleBuffer), buffersize * 4));
             (* wlAudio-> pcmBufferQueue)->Enqueue( wlAudio->pcmBufferQueue, (char *) wlAudio->sampleBuffer, buffersize * 2 * 2);
@@ -199,27 +202,26 @@ void WlAudio::initOpenSLES() {
     result = slCreateEngine(&engineObject, 0, 0, 0, 0, 0);
     result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
     result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE, &engineEngine);
-    LOGE("HHHA:0====>");
+
     //第二步，创建混音器
     const SLInterfaceID mids[1] = {SL_IID_ENVIRONMENTALREVERB};
     const SLboolean mreq[1] = {SL_BOOLEAN_FALSE};
     result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 1, mids, mreq);
     (void)result;
-    LOGE("HHHA:1====>");
+
     result = (*outputMixObject)->Realize(outputMixObject, SL_BOOLEAN_FALSE);
     (void)result;
-    LOGE("HHHA:2====>%d", result);
+
     result = (*outputMixObject)->GetInterface(outputMixObject, SL_IID_ENVIRONMENTALREVERB, &outputMixEnvironmentalReverb);
     if (SL_RESULT_SUCCESS == result) {
         result = (*outputMixEnvironmentalReverb)->SetEnvironmentalReverbProperties(
                 outputMixEnvironmentalReverb, &reverbSettings);
         (void)result;
     }
-    LOGE("HHHA:3====>");
+
     SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, outputMixObject};
     SLDataSink audioSnk = {&outputMix, 0};
 
-    LOGE("HHHA:4====>");
     // 第三步，配置PCM格式信息
     SLDataLocator_AndroidSimpleBufferQueue android_queue={SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,2};
 
@@ -455,4 +457,8 @@ int WlAudio::getPCMDB(char *pcmdata, size_t pcmsize) {
        db = (int)20.0*log10(sum);
     }
     return db;
+}
+
+void WlAudio::startStopRecord(bool start) {
+    this->isRecordPcm = start;
 }

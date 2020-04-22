@@ -56,6 +56,8 @@ public:
 
     int getSampleRate();
 
+    void startStopRecord(bool start);
+
 };
 
 

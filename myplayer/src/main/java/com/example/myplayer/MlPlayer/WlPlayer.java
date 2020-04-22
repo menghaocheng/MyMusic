@@ -25,25 +25,24 @@ public class WlPlayer {
 
     static {
         System.loadLibrary("native-lib");
-        System.loadLibrary("avutil-55");
-        System.loadLibrary("swresample-2");
         System.loadLibrary("avcodec-57");
-        System.loadLibrary("avformat-57");
-        System.loadLibrary("swscale-4");
-        System.loadLibrary("postproc-54");
-        System.loadLibrary("avfilter-6");
         System.loadLibrary("avdevice-57");
-
+        System.loadLibrary("avfilter-6");
+        System.loadLibrary("avformat-57");
+        System.loadLibrary("avutil-55");
+        System.loadLibrary("postproc-54");
+        System.loadLibrary("swresample-2");
+        System.loadLibrary("swscale-4");
     }
 
-    private static String source; //数据源
+    private static String source;//数据源
     private static WlTimeInfoBean wlTimeInfoBean;
     private static boolean playNext = false;
     private static int duration = -1;
     private static int volumePercent = 100;
     private static float speed = 1.0f;
     private static float pitch = 1.0f;
-    private boolean isRecording = false;
+    private static boolean initmediacodec = false;
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private WlOnParparedListener wlOnParparedListener;
     private WlOnLoadListener wlOnLoadListener;
@@ -145,7 +144,7 @@ public class WlPlayer {
     public void stop(){
         wlTimeInfoBean = null;
         duration = -1;
-        isRecording = false;
+        stopRecord();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -198,12 +197,33 @@ public class WlPlayer {
     }
 
     public void startRecord(File outfile){
-        if(isRecording == false && n_samplerate() > 0){
-            initMediacodec(n_samplerate(), outfile);
-            isRecording = true;
+        if(!initmediacodec) {
+            if (n_samplerate() > 0) {
+				initmediacodec = true;
+                initMediacodec(n_samplerate(), outfile);
+                n_startstoprecord(true);
+                MyLog.d("开始录制");
+            }
         }
     }
 
+    public void stopRecord(){
+        if(initmediacodec){
+            n_startstoprecord(false);
+            releaseMediacodec();
+            MyLog.d("完成录制");
+        }
+    }
+
+    public void pauseRecord(){
+        n_startstoprecord(false);
+        MyLog.d("暂停录制");
+    }
+
+    public void resumeRecord(){
+        n_startstoprecord(true);
+        MyLog.d("继续录制");
+    }
 
     /**
      * c++回调java的方法
@@ -274,6 +294,7 @@ public class WlPlayer {
     private native void n_pitch(float pitch);
     private native void n_speed(float speed);
     private native int n_samplerate();
+    private native void n_startstoprecord(boolean start);
 
     //mediacodec
 
@@ -309,7 +330,8 @@ public class WlPlayer {
 
     private void encodecPcmToAAc(int size, byte[] buffer){
 
-        if(isRecording == false){
+        if(initmediacodec == false){
+            MyLog.e("HHHC:0====>");
             return;
         }
 
@@ -342,6 +364,7 @@ public class WlPlayer {
                     encoder.releaseOutputBuffer(index, false);
                     index = encoder.dequeueOutputBuffer(info, 0);
                     outByteBuffer = null;
+                    MyLog.d("编码...");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -409,7 +432,35 @@ public class WlPlayer {
         return rate;
     }
 
+    private void releaseMediacodec(){
+        if(encoder == null){
+            return;
+        }
 
+        try{
+            outputStream.close();
+            outputStream = null;
+            encoder.stop();
+            encoder.release();
+            encoder = null;
+            encoderFormat = null;
+            info = null;
+            initmediacodec = false;
+
+            MyLog.d("录制完成...");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(outputStream != null){
+                try{
+                    outputStream.close();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+                outputStream = null;
+            }
+        }
+    }
 
 
 
