@@ -11,6 +11,7 @@ import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
+import com.example.myplayer.listener.WlOnRecordTimeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.listener.WlOnValumeDBListener;
 import com.example.myplayer.log.MyLog;
@@ -51,6 +52,7 @@ public class WlPlayer {
     private WlOnErrorListener wlOnErrorListener;
     private WlOnCompleteListener wlOnCompleteListener;
     private WlOnValumeDBListener wlOnValumeDBListener;
+    private WlOnRecordTimeListener wlOnRecordTimeListener;
 
     public WlPlayer(){}
 
@@ -93,6 +95,10 @@ public class WlPlayer {
 
     public void setWlOnValumeDBListener(WlOnValumeDBListener wlOnValumeDBListener) {
         this.wlOnValumeDBListener = wlOnValumeDBListener;
+    }
+
+    public void setWlOnRecordTimeListener(WlOnRecordTimeListener wlOnRecordTimeListener) {
+        this.wlOnRecordTimeListener = wlOnRecordTimeListener;
     }
 
     public void parpared(){
@@ -198,9 +204,10 @@ public class WlPlayer {
 
     public void startRecord(File outfile){
         if(!initmediacodec) {
-            if (n_samplerate() > 0) {
+            audioSamplerate = n_samplerate();
+            if (audioSamplerate > 0) {
 				initmediacodec = true;
-                initMediacodec(n_samplerate(), outfile);
+                initMediacodec(audioSamplerate, outfile);
                 n_startstoprecord(true);
                 MyLog.d("开始录制");
             }
@@ -305,6 +312,8 @@ public class WlPlayer {
     private int perpcmsize = 0;
     private byte[] outByteBuffer = null;
     private int aacsamplerate = 4;
+    private double recordTime = 0;
+    private int audioSamplerate = 0;
 
     private void initMediacodec(int samperate, File outfile){
         try{
@@ -319,6 +328,7 @@ public class WlPlayer {
                 MyLog.d("create encoder wrong");
                 return;
             }
+            recordTime = 0;
             encoder.configure(encoderFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             outputStream = new FileOutputStream(outfile);
             encoder.start();
@@ -330,12 +340,19 @@ public class WlPlayer {
 
     private void encodecPcmToAAc(int size, byte[] buffer){
 
-        if(initmediacodec == false){
-            MyLog.e("HHHC:0====>");
-            return;
-        }
+        //if(initmediacodec == false){
+        //    MyLog.e("HHHC:0====>");
+        //    return;
+        //}
 
         if(buffer != null && encoder != null){
+            recordTime += size * 1.0 / (audioSamplerate * 2 * (16/8));
+
+            MyLog.d("recordTime = " + recordTime);
+            if(wlOnRecordTimeListener != null){
+                wlOnRecordTimeListener.onRecordTime((int) recordTime);
+            }
+
             int inputBufferindex = encoder.dequeueInputBuffer(0);
             if(inputBufferindex >= 0)
             {
@@ -364,7 +381,6 @@ public class WlPlayer {
                     encoder.releaseOutputBuffer(index, false);
                     index = encoder.dequeueOutputBuffer(info, 0);
                     outByteBuffer = null;
-                    MyLog.d("编码...");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -438,6 +454,7 @@ public class WlPlayer {
         }
 
         try{
+            recordTime = 0;
             outputStream.close();
             outputStream = null;
             encoder.stop();

@@ -18,6 +18,7 @@ import com.example.myplayer.listener.WlOnErrorListener;
 import com.example.myplayer.listener.WlOnLoadListener;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPauseResumeListener;
+import com.example.myplayer.listener.WlOnRecordTimeListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.listener.WlOnValumeDBListener;
 import com.example.myplayer.log.MyLog;
@@ -114,6 +115,14 @@ public class MainActivity extends AppCompatActivity {
                // MyLog.d("db is: " + db);
             }
         });
+
+        wlPlayer.setWlOnRecordTimeListener(new WlOnRecordTimeListener() {
+            @Override
+            public void onRecordTime(int recordTime) {
+                MyLog.d("record time is " + recordTime);
+            }
+        });
+
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
