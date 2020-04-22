@@ -286,3 +286,10 @@ void WlFFmpeg::setSpeed(float speed) {
         audio->setSpeed(speed);
     }
 }
+
+int WlFFmpeg::getSampleRate() {
+    if(audio != NULL){
+        return audio->avCodecContext->sample_rate;
+    }
+    return 0;
+}

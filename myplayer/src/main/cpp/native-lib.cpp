@@ -164,3 +164,13 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1speed(JNIEnv *env, jobject thiz, 
     }
 }
 
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1samplerate(JNIEnv *env, jobject thiz) {
+    // TODO
+    if(fFmpeg != NULL){
+        return fFmpeg->getSampleRate();
+    }
+    return 0;
+
+}

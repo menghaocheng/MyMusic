@@ -27,6 +27,7 @@ public:
     jmethodID jmid_error;
     jmethodID jmid_complete;
     jmethodID jmid_valuedb;
+    jmethodID jmid_pcmtoaac;
 
 public:
     WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj);
@@ -43,6 +44,8 @@ public:
     void onCallComplete(int type);
 
     void onCallValueDB(int type, int db);
+
+    void onCallPcmToAAc(int type, int size, void *buffer);
 
 };
 

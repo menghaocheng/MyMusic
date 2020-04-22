@@ -54,6 +54,8 @@ public:
 
     void setSpeed(float speed);
 
+    int getSampleRate();
+
 };
 
 

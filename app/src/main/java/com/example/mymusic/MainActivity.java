@@ -25,6 +25,8 @@ import com.example.myplayer.muteenum.MuteEnum;
 import com.example.myplayer.MlPlayer.WlPlayer;
 import com.example.myplayer.util.WlTimeUtil;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
 
     private WlPlayer wlPlayer;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         tvVolume = findViewById(R.id.tv_volume);
         wlPlayer = new WlPlayer();
         wlPlayer.setVolume(50);
-        wlPlayer.setPitch(1.5f);
+        //wlPlayer.setPitch(1.5f);
         wlPlayer.setSpeed(1.5f);
         wlPlayer.setMute(MuteEnum.MUTE_LEFT);
         tvVolume.setText("音量：" + wlPlayer.getVolumePercent() + "%");
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         wlPlayer.setWlOnValumeDBListener(new WlOnValumeDBListener() {
             @Override
             public void onDbValue(int db) {
-                MyLog.d("db is: " + db);
+               // MyLog.d("db is: " + db);
             }
         });
         seekBarSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -228,5 +230,9 @@ public class MainActivity extends AppCompatActivity {
     public void normalspeedpitch(View view) {
         wlPlayer.setSpeed(1.0f);
         wlPlayer.setPitch(1.0f);
+    }
+
+    public void start_record(View view) {
+        wlPlayer.startRecord(new File("/mnt/sdcard/Music/textplay.aac"));
     }
 }
