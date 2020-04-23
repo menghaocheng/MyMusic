@@ -40,11 +40,10 @@ int WlQueue::getAvpacket(AVPacket *packet) {
             av_free(avPacket);
             avPacket = NULL;
             break;
-        } else {
+        } else{
             pthread_cond_wait(&condPacket, &mutexPacket);
         }
     }
-
     pthread_mutex_unlock(&mutexPacket);
     return 0;
 }

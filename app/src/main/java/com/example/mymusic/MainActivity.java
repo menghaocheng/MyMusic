@@ -48,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
         seekBarVolume = findViewById(R.id.seekbar_volume);
         tvVolume = findViewById(R.id.tv_volume);
         wlPlayer = new WlPlayer();
-        wlPlayer.setVolume(50);
-        //wlPlayer.setPitch(1.5f);
-        wlPlayer.setSpeed(1.5f);
+        wlPlayer.setVolume(80);
+        wlPlayer.setPitch(1.0f);
+        wlPlayer.setSpeed(1.0f);
         wlPlayer.setMute(MuteEnum.MUTE_LEFT);
         tvVolume.setText("音量：" + wlPlayer.getVolumePercent() + "%");
         seekBarVolume.setProgress(wlPlayer.getVolumePercent());

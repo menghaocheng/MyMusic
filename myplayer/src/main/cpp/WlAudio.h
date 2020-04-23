@@ -9,11 +9,10 @@
 #include "WlPlaystatus.h"
 #include "WlCallJava.h"
 #include "SoundTouch.h"
+#include "WlBufferQueue.h"
+#include "WlPcmBean.h"
 
 using namespace soundtouch;
-
-
-
 
 extern "C"
 {
@@ -88,6 +87,10 @@ public:
     bool isCut = false;
     int end_time = 0;
     bool showPcm = false;
+
+    pthread_t pcmCallBackThread;
+    WlBufferQueue *bufferQueue = NULL;
+    int defaultPcmSize = 4096;
 
 
 public:

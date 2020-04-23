@@ -39,10 +39,64 @@ void *decodPlay(void *data){
     pthread_exit(&wlAudio->thread_play);
 }
 
+void *pcmCallBack(void *data){
+    WlAudio *audio = static_cast<WlAudio *>(data);
+    while(audio->playstatus != NULL && !audio->playstatus->exit){
+        WlPcmBean *pcmBean = NULL;
+        audio->bufferQueue->getBuffer(&pcmBean);
+        if(pcmBean == NULL){
+            continue;
+        }
+
+        //LOGD("pcmbean buffer size is %d", pcmBean->buffsize);
+
+        if(pcmBean->buffsize <= audio->defaultPcmSize){ //不用分包
+            if(audio->isRecordPcm){
+                audio->callJava->onCallPcmToAAc(CHILD_THREAD, pcmBean->buffsize, pcmBean->buffer);
+            }
+            if(audio->showPcm){
+                audio->callJava->onCallPcmInfo(pcmBean->buffer, pcmBean->buffsize);
+            }
+        } else {
+            int pack_num = pcmBean->buffsize / audio->defaultPcmSize;
+            int pack_sub = pcmBean->buffsize % audio->defaultPcmSize;
+
+            for(int i = 0; i < pack_num; i++){
+                char *bf = static_cast<char *>(malloc(audio->defaultPcmSize));
+                memcpy(bf, pcmBean->buffer + i * audio->defaultPcmSize, audio->defaultPcmSize);
+                if(audio->isRecordPcm){
+                    audio->callJava->onCallPcmToAAc(CHILD_THREAD, audio->defaultPcmSize, bf);
+                }
+                if(audio->showPcm){
+                    audio->callJava->onCallPcmInfo(bf, audio->defaultPcmSize);
+                }
+                free(bf);
+                bf = NULL;
+            }
+
+            if(pack_sub > 0){
+                char *bf = static_cast<char *>(malloc(pack_sub));
+                memcpy(bf, pcmBean->buffer + pack_num * audio->defaultPcmSize, pack_sub);
+                if(audio->isRecordPcm){
+                    audio->callJava->onCallPcmToAAc(CHILD_THREAD, pack_sub, bf);
+                }
+                if(audio->showPcm){
+                    audio->callJava->onCallPcmInfo(bf, pack_sub);
+                }
+            }
+        }
+        delete(pcmBean);
+        pcmBean = NULL;
+    }
+    pthread_exit(&audio->pcmCallBackThread);
+}
+
+
 void WlAudio::play() {
 
+    bufferQueue = new WlBufferQueue(playstatus);
     pthread_create(&thread_play, NULL, decodPlay, this);
-
+    pthread_create(&pcmCallBackThread, NULL, pcmCallBack, this);
 }
 
 
@@ -197,19 +251,14 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context){
                 //回调应用层
                 wlAudio->callJava->onCallTimeInfo(CHILD_THREAD, wlAudio->clock, wlAudio->duration);
             }
-            if(wlAudio->isRecordPcm){
-                wlAudio->callJava->onCallPcmToAAc(CHILD_THREAD, buffersize * 2 * 2, wlAudio->sampleBuffer);
-            }
+            wlAudio->bufferQueue->putBuffer(wlAudio->sampleBuffer, buffersize * 4);
+
 
             wlAudio->callJava->onCallValueDB(CHILD_THREAD,
                     wlAudio->getPCMDB(reinterpret_cast<char *>(wlAudio->sampleBuffer), buffersize * 4));
             (* wlAudio-> pcmBufferQueue)->Enqueue( wlAudio->pcmBufferQueue, (char *) wlAudio->sampleBuffer, buffersize * 2 * 2);
 
             if(wlAudio->isCut){
-                if(wlAudio->showPcm){
-                    //
-                    wlAudio->callJava->onCallPcmInfo(wlAudio->sampleBuffer, buffersize * 2 * 2);
-                }
                 if(wlAudio->clock > wlAudio->end_time){
                     LOGE("裁剪退出...");
                     wlAudio->playstatus->exit = true;
@@ -261,7 +310,7 @@ void WlAudio::initOpenSLES() {
     const SLInterfaceID ids[4] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_PLAYBACKRATE, SL_IID_MUTESOLO};
     const SLboolean req[4] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
 
-    (*engineEngine)->CreateAudioPlayer(engineEngine, &pcmPlayerObject, &slDataSource, &audioSnk, 3, ids, req);
+    (*engineEngine)->CreateAudioPlayer(engineEngine, &pcmPlayerObject, &slDataSource, &audioSnk, 4, ids, req);
     //初始化播放器
     (*pcmPlayerObject)->Realize(pcmPlayerObject, SL_BOOLEAN_FALSE);
 
@@ -347,7 +396,14 @@ void WlAudio::resume() {
 }
 
 void WlAudio::release() {
-    //stop();
+    stop();
+    if(bufferQueue != NULL){
+        bufferQueue->noticeThread();
+        pthread_join(pcmCallBackThread, NULL);
+        bufferQueue->release();
+        delete(bufferQueue);
+        bufferQueue = NULL;
+    }
     if(queue != NULL){
         delete(queue);
         queue = NULL;

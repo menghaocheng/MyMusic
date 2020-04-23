@@ -5,12 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.example.myplayer.MlPlayer.WlPlayer;
 import com.example.myplayer.WlTimeInfoBean;
 import com.example.myplayer.listener.WlOnParparedListener;
 import com.example.myplayer.listener.WlOnPcmInfoListener;
 import com.example.myplayer.listener.WlOnTimeInfoListener;
 import com.example.myplayer.log.MyLog;
+import com.example.myplayer.MlPlayer.WlPlayer;
 
 public class CutActivity extends AppCompatActivity {
 

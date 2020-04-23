@@ -45,6 +45,7 @@ public class WlPlayer {
     private static float speed = 1.0f;
     private static float pitch = 1.0f;
     private static boolean initmediacodec = false;
+    private static Object mediacodecLock = new Object();
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private WlOnParparedListener wlOnParparedListener;
     private WlOnLoadListener wlOnLoadListener;
@@ -209,22 +210,26 @@ public class WlPlayer {
     }
 
     public void startRecord(File outfile){
-        if(!initmediacodec) {
-            audioSamplerate = n_samplerate();
-            if (audioSamplerate > 0) {
-				initmediacodec = true;
-                initMediacodec(audioSamplerate, outfile);
-                n_startstoprecord(true);
-                MyLog.d("开始录制");
+        synchronized (mediacodecLock) {
+            if (!initmediacodec) {
+                audioSamplerate = n_samplerate();
+                if (audioSamplerate > 0) {
+                    initmediacodec = true;
+                    initMediacodec(audioSamplerate, outfile);
+                    n_startstoprecord(true);
+                    MyLog.e("开始录制");
+                }
             }
         }
     }
 
     public void stopRecord(){
-        if(initmediacodec){
-            n_startstoprecord(false);
-            releaseMediacodec();
-            MyLog.d("完成录制");
+        synchronized (mediacodecLock) {
+            if (initmediacodec) {
+                n_startstoprecord(false);
+                releaseMediacodec();
+                MyLog.e("完成录制");
+            }
         }
     }
 
@@ -329,7 +334,8 @@ public class WlPlayer {
     private native int n_samplerate();
     private native void n_startstoprecord(boolean start);
 
-    private native boolean n_cutaudioplay(int start_time, int end_time, boolean show_pcm);
+    private native boolean n_cutaudioplay(int start_time, int end_time, boolean showPcm);
+
 
     //mediacodec
 
@@ -343,13 +349,14 @@ public class WlPlayer {
     private double recordTime = 0;
     private int audioSamplerate = 0;
 
+
     private void initMediacodec(int samperate, File outfile){
         try{
             aacsamplerate = getADTSsamplerate(samperate);
             encoderFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, samperate, 2);
             encoderFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
             encoderFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-            encoderFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 8192);
+            encoderFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096);
             encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
             info = new MediaCodec.BufferInfo();
             if(encoder == null){
@@ -367,44 +374,48 @@ public class WlPlayer {
 
 
     private void encodecPcmToAAc(int size, byte[] buffer){
-        if(buffer != null && encoder != null){
-            recordTime += size * 1.0 / (audioSamplerate * 2 * (16/8));
-
-            MyLog.d("recordTime = " + recordTime);
-            if(wlOnRecordTimeListener != null){
-                wlOnRecordTimeListener.onRecordTime((int) recordTime);
+        synchronized (mediacodecLock) {
+            if (initmediacodec == false) {
+                return;
             }
+            if (buffer != null && encoder != null) {
+                recordTime += size * 1.0 / (audioSamplerate * 2 * (16 / 8));
 
-            int inputBufferindex = encoder.dequeueInputBuffer(0);
-            if(inputBufferindex >= 0)
-            {
-                ByteBuffer byteBuffer = encoder.getInputBuffer(inputBufferindex);
-                byteBuffer.clear();
-                byteBuffer.put(buffer);
-                encoder.queueInputBuffer(inputBufferindex, 0, size, 0, 0);
-            }
+                MyLog.d("recordTime = " + recordTime);
+                if (wlOnRecordTimeListener != null) {
+                    wlOnRecordTimeListener.onRecordTime((int) recordTime);
+                }
 
-            int index = encoder.dequeueOutputBuffer(info, 0);
-            while(index >= 0){
-                try{
-                    perpcmsize = info.size + 7;
-                    outByteBuffer = new byte[perpcmsize];
+                int inputBufferindex = encoder.dequeueInputBuffer(0);
+                if (inputBufferindex >= 0) {
+                    ByteBuffer byteBuffer = encoder.getInputBuffer(inputBufferindex);
+                    byteBuffer.clear();
+                    byteBuffer.put(buffer);
+                    encoder.queueInputBuffer(inputBufferindex, 0, size, 0, 0);
+                }
 
-                    ByteBuffer byteBuffer = encoder.getOutputBuffer(index);
-                    byteBuffer.position(info.offset);
-                    byteBuffer.limit(info.offset + info.size);
+                int index = encoder.dequeueOutputBuffer(info, 0);
+                while (index >= 0 && initmediacodec) {
+                    try {
+                        perpcmsize = info.size + 7;
+                        outByteBuffer = new byte[perpcmsize];
 
-                    addADtsHeader(outByteBuffer, perpcmsize, aacsamplerate);
+                        ByteBuffer byteBuffer = encoder.getOutputBuffer(index);
+                        byteBuffer.position(info.offset);
+                        byteBuffer.limit(info.offset + info.size);
 
-                    byteBuffer.get(outByteBuffer, 7, info.size);
-                    byteBuffer.position(info.offset);
-                    outputStream.write(outByteBuffer, 0, perpcmsize);
+                        addADtsHeader(outByteBuffer, perpcmsize, aacsamplerate);
 
-                    encoder.releaseOutputBuffer(index, false);
-                    index = encoder.dequeueOutputBuffer(info, 0);
-                    outByteBuffer = null;
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        byteBuffer.get(outByteBuffer, 7, info.size);
+                        byteBuffer.position(info.offset);
+                        outputStream.write(outByteBuffer, 0, perpcmsize);
+
+                        encoder.releaseOutputBuffer(index, false);
+                        index = encoder.dequeueOutputBuffer(info, 0);
+                        outByteBuffer = null;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -474,8 +485,7 @@ public class WlPlayer {
         if(encoder == null){
             return;
         }
-
-        try{
+        try {
             recordTime = 0;
             outputStream.close();
             outputStream = null;
