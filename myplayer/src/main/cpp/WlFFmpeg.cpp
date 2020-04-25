@@ -5,14 +5,13 @@
 
 #include "WlFFmpeg.h"
 
-
 WlFFmpeg::WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url) {
     this->playstatus = playstatus;
     this->callJava = callJava;
     this->url = url;
     exit = false;
-	pthread_mutex_init(&init_mutex, NULL);
-	pthread_mutex_init(&seek_mutex, NULL);
+    pthread_mutex_init(&init_mutex, NULL);
+    pthread_mutex_init(&seek_mutex, NULL);
 }
 
 void *decodeFFmpeg(void *data){
@@ -28,7 +27,7 @@ void WlFFmpeg::parpared() {
 
 int avformat_callback(void *ctx){
     WlFFmpeg *fFmpeg = (WlFFmpeg*)ctx;
-    if(fFmpeg->playstatus == NULL || fFmpeg->playstatus->exit){
+    if(fFmpeg->playstatus->exit){
         return AVERROR_EOF;
     }
     return 0;
@@ -107,14 +106,17 @@ void WlFFmpeg::start() {
         return;
     }
     audio->play();
+    video->play();
 
 
     while (playstatus != NULL && !playstatus->exit) {
         if(playstatus->seek){
+            av_usleep(1000 * 100);
             continue;
         }
 
         if(audio->queue->getQueueSize() > 40){
+            av_usleep(1000 * 100);
             continue;
         }
 
@@ -122,6 +124,8 @@ void WlFFmpeg::start() {
         if (av_read_frame(pFormatCtx, avPacket) == 0) {
             if (avPacket->stream_index == audio->streamIndex) {
                 audio->queue->putAvpacket(avPacket);
+            } else if(avPacket->stream_index == video->streamIndex){
+                video->queue->putAvpacket(avPacket);
             } else {
                 av_packet_free(&avPacket);
                 av_free(avPacket);
@@ -131,6 +135,7 @@ void WlFFmpeg::start() {
             av_free(avPacket);
             while(playstatus != NULL && !playstatus->exit){
                 if(audio->queue->getQueueSize() > 0){
+                    av_usleep(1000 * 100);
                     continue;
                 } else {
                     playstatus->exit = true;
@@ -187,6 +192,14 @@ void WlFFmpeg::release() {
         delete(audio);
         audio = NULL;
     }
+    if(LOG_DEBUG){
+        LOGE("释放 video");
+    }
+    if(video != NULL){
+        video->release();
+        delete(video);
+        video = NULL;
+    }
 
     if(LOG_DEBUG){
         LOGE("释放封装格式上下文");
@@ -212,8 +225,8 @@ void WlFFmpeg::release() {
 }
 
 WlFFmpeg::~WlFFmpeg() {
-
     pthread_mutex_destroy(&init_mutex);
+    pthread_mutex_destroy(&seek_mutex);
 }
 
 void WlFFmpeg::seek(int64_t secds) {

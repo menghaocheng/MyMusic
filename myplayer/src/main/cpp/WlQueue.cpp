@@ -13,6 +13,8 @@ WlQueue::WlQueue(WlPlaystatus *playstatus) {
 
 WlQueue::~WlQueue() {
     clearAvpacket();
+    pthread_mutex_destroy(&mutexPacket);
+    pthread_cond_destroy(&condPacket);
 }
 
 int WlQueue::putAvpacket(AVPacket *packet) {
@@ -40,11 +42,10 @@ int WlQueue::getAvpacket(AVPacket *packet) {
             av_free(avPacket);
             avPacket = NULL;
             break;
-        } else {
+        } else{
             pthread_cond_wait(&condPacket, &mutexPacket);
         }
     }
-
     pthread_mutex_unlock(&mutexPacket);
     return 0;
 }

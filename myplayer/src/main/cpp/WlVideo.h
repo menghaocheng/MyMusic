@@ -5,11 +5,13 @@
 #ifndef MYMUSIC_WLVIDEO_H
 #define MYMUSIC_WLVIDEO_H
 
+
 #include "WlQueue.h"
 #include "WlCallJava.h"
 
 extern "C"
 {
+#include <libavutil/time.h>
 #include <libavcodec/avcodec.h>
 };
 
@@ -34,6 +36,8 @@ public:
     ~WlVideo();
 
     void play();
+
+    void release();
 
 
 
