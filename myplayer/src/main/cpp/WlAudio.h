@@ -12,6 +12,7 @@
 
 extern "C"
 {
+#include <libavutil/time.h>
 #include "libavcodec/avcodec.h"
 #include <libswresample/swresample.h>
 #include <SLES/OpenSLES.h>

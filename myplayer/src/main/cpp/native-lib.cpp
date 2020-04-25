@@ -31,7 +31,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved){
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1parpared(JNIEnv *env, jobject instance, jstring source_) {
+Java_com_example_myplayer_MlPlayer_WlPlayer_n_1parpared(JNIEnv *env, jobject instance, 
+                                                      jstring source_) {
     const char *source = env->GetStringUTFChars(source_, 0);
 
     if(fFmpeg == NULL){

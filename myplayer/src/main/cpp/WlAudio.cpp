@@ -33,6 +33,7 @@ int WlAudio::resampleAudio() {
     while(playstatus != NULL && !playstatus->exit){
 
         if(playstatus->seek){
+            av_usleep(1000 * 100);
             continue;
         }
         if(queue->getQueueSize() == 0) { //加载中
@@ -40,6 +41,7 @@ int WlAudio::resampleAudio() {
                 playstatus->load = true;
                 callJava->onCallLoad(CHILD_THREAD, true);
             }
+            av_usleep(1000 * 100);
             continue;
         } else{
             if(playstatus->load){
@@ -187,10 +189,10 @@ void WlAudio::initOpenSLES() {
     SLDataSource slDataSource = {&android_queue, &pcm};
 
 
-    const SLInterfaceID ids[1] = {SL_IID_BUFFERQUEUE};
-    const SLboolean req[1] = {SL_BOOLEAN_TRUE};
+    const SLInterfaceID ids[2] = {SL_IID_BUFFERQUEUE, SL_IID_PLAYBACKRATE};
+    const SLboolean req[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
 
-    (*engineEngine)->CreateAudioPlayer(engineEngine, &pcmPlayerObject, &slDataSource, &audioSnk, 1, ids, req);
+    (*engineEngine)->CreateAudioPlayer(engineEngine, &pcmPlayerObject, &slDataSource, &audioSnk, 2, ids, req);
     //初始化播放器
     (*pcmPlayerObject)->Realize(pcmPlayerObject, SL_BOOLEAN_FALSE);
 

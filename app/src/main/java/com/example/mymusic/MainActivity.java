@@ -90,9 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void begin(View view){
+        wlPlayer.setSource("/sdcard/Movies/《刺猬索尼克》定档2月28日，童年经典首登银幕，音速出击拯救世界！.mp4");
         //wlPlayer.setSource("http://mpge.5nd.com/2015/2015-12-26/69708/1.mp3");
         //wlPlayer.setSource("http://downsc.chinaz.net/Files/DownLoad/sound1/202004/12723.mp3");
-        wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
+        //wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");
         //wlPlayer.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
         wlPlayer.parpared();
     }

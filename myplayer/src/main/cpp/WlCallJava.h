@@ -5,7 +5,6 @@
 #ifndef MYMUSIC_WLCALLJAVA_H
 #define MYMUSIC_WLCALLJAVA_H
 
-
 #include "jni.h"
 #include <linux/stddef.h>
 #include "AndroidLog.h"
