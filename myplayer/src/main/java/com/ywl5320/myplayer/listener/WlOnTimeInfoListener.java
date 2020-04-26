@@ -1,6 +1,6 @@
-package com.example.myplayer.listener;
+package com.ywl5320.myplayer.listener;
 
-import com.example.myplayer.WlTimeInfoBean;
+import com.ywl5320.myplayer.WlTimeInfoBean;
 
 public interface WlOnTimeInfoListener {
 

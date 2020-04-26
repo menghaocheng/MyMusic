@@ -1,15 +1,15 @@
-package com.example.myplayer.MlPlayer;
+package com.ywl5320.myplayer.player;
 
 import android.text.TextUtils;
 
-import com.example.myplayer.WlTimeInfoBean;
-import com.example.myplayer.listener.WlOnCompleteListener;
-import com.example.myplayer.listener.WlOnErrorListener;
-import com.example.myplayer.listener.WlOnLoadListener;
-import com.example.myplayer.listener.WlOnParparedListener;
-import com.example.myplayer.listener.WlOnPauseResumeListener;
-import com.example.myplayer.listener.WlOnTimeInfoListener;
-import com.example.myplayer.log.MyLog;
+import com.ywl5320.myplayer.WlTimeInfoBean;
+import com.ywl5320.myplayer.listener.WlOnCompleteListener;
+import com.ywl5320.myplayer.listener.WlOnErrorListener;
+import com.ywl5320.myplayer.listener.WlOnLoadListener;
+import com.ywl5320.myplayer.listener.WlOnParparedListener;
+import com.ywl5320.myplayer.listener.WlOnPauseResumeListener;
+import com.ywl5320.myplayer.listener.WlOnTimeInfoListener;
+import com.ywl5320.myplayer.log.MyLog;
 
 public class WlPlayer {
 
@@ -180,6 +180,12 @@ public class WlPlayer {
             parpared();
         }
     }
+
+    public void onCallRenderYUV(int width , int height, byte[] y, byte[] u, byte[] v){
+        MyLog.d("获取到视频yuv数据");
+    }
+
+
     private native void n_parpared(String source);
     private native void n_start();
     private native void n_pause();

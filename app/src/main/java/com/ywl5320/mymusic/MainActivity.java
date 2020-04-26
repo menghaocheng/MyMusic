@@ -1,4 +1,4 @@
-package com.example.mymusic;
+package com.ywl5320.mymusic;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,16 +9,16 @@ import android.os.Message;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.myplayer.WlTimeInfoBean;
-import com.example.myplayer.listener.WlOnCompleteListener;
-import com.example.myplayer.listener.WlOnErrorListener;
-import com.example.myplayer.listener.WlOnLoadListener;
-import com.example.myplayer.listener.WlOnParparedListener;
-import com.example.myplayer.listener.WlOnPauseResumeListener;
-import com.example.myplayer.listener.WlOnTimeInfoListener;
-import com.example.myplayer.log.MyLog;
-import com.example.myplayer.MlPlayer.WlPlayer;
-import com.example.myplayer.util.WlTimeUtil;
+import com.ywl5320.myplayer.WlTimeInfoBean;
+import com.ywl5320.myplayer.listener.WlOnCompleteListener;
+import com.ywl5320.myplayer.listener.WlOnErrorListener;
+import com.ywl5320.myplayer.listener.WlOnLoadListener;
+import com.ywl5320.myplayer.listener.WlOnParparedListener;
+import com.ywl5320.myplayer.listener.WlOnPauseResumeListener;
+import com.ywl5320.myplayer.listener.WlOnTimeInfoListener;
+import com.ywl5320.myplayer.log.MyLog;
+import com.ywl5320.myplayer.player.WlPlayer;
+import com.ywl5320.myplayer.util.WlTimeUtil;
 
 public class MainActivity extends AppCompatActivity {
 

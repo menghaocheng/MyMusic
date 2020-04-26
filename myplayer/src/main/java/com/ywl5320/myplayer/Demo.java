@@ -1,4 +1,4 @@
-package com.example.myplayer;
+package com.ywl5320.myplayer;
 
 public class Demo {
     static {

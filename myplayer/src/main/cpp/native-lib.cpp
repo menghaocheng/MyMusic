@@ -31,7 +31,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved){
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1parpared(JNIEnv *env, jobject instance, 
+Java_com_ywl5320_myplayer_player_WlPlayer_n_1parpared(JNIEnv *env, jobject instance,
                                                       jstring source_) {
     const char *source = env->GetStringUTFChars(source_, 0);
 
@@ -54,7 +54,7 @@ void *startCallBack(void *data){
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1start(JNIEnv *env, jobject thiz) {
+Java_com_ywl5320_myplayer_player_WlPlayer_n_1start(JNIEnv *env, jobject thiz) {
 
     // TODO
     if(fFmpeg != NULL){
@@ -64,7 +64,7 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1start(JNIEnv *env, jobject thiz) 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1pause(JNIEnv *env, jobject thiz) {
+Java_com_ywl5320_myplayer_player_WlPlayer_n_1pause(JNIEnv *env, jobject thiz) {
     // TODO
     if(fFmpeg != NULL){
         fFmpeg->pause();
@@ -73,7 +73,7 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1pause(JNIEnv *env, jobject thiz) 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1resume(JNIEnv *env, jobject thiz) {
+Java_com_ywl5320_myplayer_player_WlPlayer_n_1resume(JNIEnv *env, jobject thiz) {
     // TODO
     if(fFmpeg != NULL){
         fFmpeg->resume();
@@ -82,7 +82,7 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1resume(JNIEnv *env, jobject thiz)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
+Java_com_ywl5320_myplayer_player_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
 
     // TODO
     if(!nexit){
@@ -112,7 +112,7 @@ Java_com_example_myplayer_MlPlayer_WlPlayer_n_1stop(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myplayer_MlPlayer_WlPlayer_n_1seek(JNIEnv *env, jobject thiz, jint secds) {
+Java_com_ywl5320_myplayer_player_WlPlayer_n_1seek(JNIEnv *env, jobject thiz, jint secds) {
     // TODO
     if(fFmpeg != NULL){
         fFmpeg->seek(secds);

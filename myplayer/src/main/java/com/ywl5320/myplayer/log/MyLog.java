@@ -1,4 +1,4 @@
-package com.example.myplayer.log;
+package com.ywl5320.myplayer.log;
 
 import android.util.Log;
 
