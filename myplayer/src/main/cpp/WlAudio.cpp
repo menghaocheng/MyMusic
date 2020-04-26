@@ -1,6 +1,7 @@
 //
-// Created by Administrator on 2020/4/17.
+// Created by yangw on 2018-2-28.
 //
+
 
 #include "WlAudio.h"
 
@@ -9,56 +10,66 @@ WlAudio::WlAudio(WlPlaystatus *playstatus, int sample_rate, WlCallJava *callJava
     this->playstatus = playstatus;
     this->sample_rate = sample_rate;
     queue = new WlQueue(playstatus);
-    buffer = (uint8_t*) av_malloc(sample_rate * 2 * 2);
+    buffer = (uint8_t *) av_malloc(sample_rate * 2 * 2);
 }
 
 WlAudio::~WlAudio() {
 
 }
 
-void *decodPlay(void *data){
-    WlAudio *wlAudio = (WlAudio*)data;
+void *decodPlay(void *data)
+{
+    WlAudio *wlAudio = (WlAudio *) data;
+
     wlAudio->initOpenSLES();
+
     pthread_exit(&wlAudio->thread_play);
 }
 
-
 void WlAudio::play() {
-    pthread_create(&thread_play, NULL, decodPlay, this);
-}
 
+    pthread_create(&thread_play, NULL, decodPlay, this);
+
+}
 
 int WlAudio::resampleAudio() {
     data_size = 0;
-    while(playstatus != NULL && !playstatus->exit){
+    while(playstatus != NULL && !playstatus->exit)
+    {
 
-        if(playstatus->seek){
+        if(playstatus->seek)
+        {
             av_usleep(1000 * 100);
             continue;
         }
-        if(queue->getQueueSize() == 0) { //加载中
-            if(!playstatus->load){
+
+        if(queue->getQueueSize() == 0)//加载中
+        {
+            if(!playstatus->load)
+            {
                 playstatus->load = true;
                 callJava->onCallLoad(CHILD_THREAD, true);
             }
             av_usleep(1000 * 100);
             continue;
         } else{
-            if(playstatus->load){
+            if(playstatus->load)
+            {
                 playstatus->load = false;
                 callJava->onCallLoad(CHILD_THREAD, false);
             }
         }
-
         avPacket = av_packet_alloc();
-        if(queue->getAvpacket(avPacket) != 0){
+        if(queue->getAvpacket(avPacket) != 0)
+        {
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
             continue;
         }
         ret = avcodec_send_packet(avCodecContext, avPacket);
-        if(ret != 0){
+        if(ret != 0)
+        {
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
@@ -66,10 +77,15 @@ int WlAudio::resampleAudio() {
         }
         avFrame = av_frame_alloc();
         ret = avcodec_receive_frame(avCodecContext, avFrame);
-        if(ret == 0){
-            if(avFrame->channels && avFrame->channel_layout == 0){
+        if(ret == 0)
+        {
+
+            if(avFrame->channels && avFrame->channel_layout == 0)
+            {
                 avFrame->channel_layout = av_get_default_channel_layout(avFrame->channels);
-            }else if(avFrame->channels == 0 && avFrame->channel_layout > 0){
+            }
+            else if(avFrame->channels == 0 && avFrame->channel_layout > 0)
+            {
                 avFrame->channels = av_get_channel_layout_nb_channels(avFrame->channel_layout);
             }
 
@@ -81,11 +97,12 @@ int WlAudio::resampleAudio() {
                                 AV_SAMPLE_FMT_S16,
                                 avFrame->sample_rate,
                                 avFrame->channel_layout,
-                                (AVSampleFormat)avFrame->format,
+                                (AVSampleFormat) avFrame->format,
                                 avFrame->sample_rate,
                                 NULL, NULL
-                                );
-            if(!swr_ctx || swr_init(swr_ctx) < 0){
+            );
+            if(!swr_ctx || swr_init(swr_ctx) <0)
+            {
                 av_packet_free(&avPacket);
                 av_free(avPacket);
                 avPacket = NULL;
@@ -97,17 +114,18 @@ int WlAudio::resampleAudio() {
             }
 
             int nb = swr_convert(
-                    swr_ctx,
-                    &buffer,
-                    avFrame->nb_samples,
-                    (const uint8_t **) avFrame->data,
-                    avFrame->nb_samples);
+                swr_ctx,
+                &buffer,
+                avFrame->nb_samples,
+                (const uint8_t **) avFrame->data,
+                avFrame->nb_samples);
 
             int out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
             data_size = nb * out_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 
             now_time = avFrame->pts * av_q2d(time_base);
-            if(now_time < clock){
+            if(now_time < clock)
+            {
                 now_time = clock;
             }
             clock = now_time;
@@ -120,7 +138,7 @@ int WlAudio::resampleAudio() {
             avFrame = NULL;
             swr_free(&swr_ctx);
             break;
-        }else{
+        } else{
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
@@ -129,23 +147,26 @@ int WlAudio::resampleAudio() {
             avFrame = NULL;
             continue;
         }
-
     }
     return data_size;
 }
 
-void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context){
+void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
+{
     WlAudio *wlAudio = (WlAudio *) context;
-    if(wlAudio != NULL){
+    if(wlAudio != NULL)
+    {
         int buffersize = wlAudio->resampleAudio();
-        if(buffersize > 0){
+        if(buffersize > 0)
+        {
             wlAudio->clock += buffersize / ((double)(wlAudio->sample_rate * 2 * 2));
-            if(wlAudio->clock - wlAudio->last_time >= 0.1){
-                wlAudio->last_time = wlAudio->clock;
+            if(wlAudio->clock - wlAudio->last_tiem >= 0.1)
+            {
+                wlAudio->last_tiem = wlAudio->clock;
                 //回调应用层
                 wlAudio->callJava->onCallTimeInfo(CHILD_THREAD, wlAudio->clock, wlAudio->duration);
             }
-            (*wlAudio->pcmBufferQueue)->Enqueue(wlAudio->pcmBufferQueue, (char*)wlAudio->buffer, buffersize);
+            (* wlAudio-> pcmBufferQueue)->Enqueue( wlAudio->pcmBufferQueue, (char *) wlAudio-> buffer, buffersize);
         }
     }
 }
@@ -260,65 +281,76 @@ int WlAudio::getCurrentSampleRateForOpensles(int sample_rate) {
 }
 
 void WlAudio::pause() {
-    if(pcmPlayerPlay != NULL){
-        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay, SL_PLAYSTATE_PAUSED);
+    if(pcmPlayerPlay != NULL)
+    {
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,  SL_PLAYSTATE_PAUSED);
     }
 }
 
 void WlAudio::resume() {
-    if(pcmPlayerPlay != NULL){
-        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay, SL_PLAYSTATE_PLAYING);
+    if(pcmPlayerPlay != NULL)
+    {
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,  SL_PLAYSTATE_PLAYING);
     }
 }
 
 void WlAudio::release() {
-    stop();
-    if(queue != NULL){
+
+    if(queue != NULL)
+    {
         delete(queue);
         queue = NULL;
     }
 
-    if(pcmPlayerObject != NULL){
+    if(pcmPlayerObject != NULL)
+    {
         (*pcmPlayerObject)->Destroy(pcmPlayerObject);
         pcmPlayerObject = NULL;
         pcmPlayerPlay = NULL;
         pcmBufferQueue = NULL;
     }
 
-    if(outputMixObject != NULL){
+    if(outputMixObject != NULL)
+    {
         (*outputMixObject)->Destroy(outputMixObject);
         outputMixObject = NULL;
         outputMixEnvironmentalReverb = NULL;
     }
 
-    if(engineObject != NULL){
+    if(engineObject != NULL)
+    {
         (*engineObject)->Destroy(engineObject);
         engineObject = NULL;
         engineEngine = NULL;
     }
 
-    if(buffer != NULL){
+    if(buffer != NULL)
+    {
         free(buffer);
         buffer = NULL;
     }
 
-    if(avCodecContext != NULL){
+    if(avCodecContext != NULL)
+    {
         avcodec_close(avCodecContext);
         avcodec_free_context(&avCodecContext);
         avCodecContext = NULL;
     }
 
-    if(playstatus != NULL){
+    if(playstatus != NULL)
+    {
         playstatus = NULL;
     }
-    if(callJava != NULL){
+    if(callJava != NULL)
+    {
         callJava = NULL;
     }
 
 }
 
 void WlAudio::stop() {
-    if(pcmPlayerPlay != NULL){
-        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay, SL_PLAYSTATE_STOPPED);
+    if(pcmPlayerPlay != NULL)
+    {
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,  SL_PLAYSTATE_STOPPED);
     }
 }

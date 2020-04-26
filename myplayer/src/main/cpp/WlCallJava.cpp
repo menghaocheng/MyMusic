@@ -1,18 +1,21 @@
 //
-// Created by Administrator on 2020/4/17.
+// Created by yangw on 2018-2-28.
 //
 
 #include "WlCallJava.h"
 
 WlCallJava::WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj) {
+
     this->javaVM = javaVM;
     this->jniEnv = env;
     this->jobj = *obj;
     this->jobj = env->NewGlobalRef(jobj);
 
-    jclass jlz = jniEnv->GetObjectClass(jobj);
-    if(!jlz){
-        if(LOG_DEBUG){
+    jclass  jlz = jniEnv->GetObjectClass(jobj);
+    if(!jlz)
+    {
+        if(LOG_DEBUG)
+        {
             LOGE("get jclass wrong");
         }
         return;
@@ -27,45 +30,65 @@ WlCallJava::WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj) {
 }
 
 void WlCallJava::onCallParpared(int type) {
-    if(type == MAIN_THREAD){
+
+    if(type == MAIN_THREAD)
+    {
         jniEnv->CallVoidMethod(jobj, jmid_parpared);
-    }else if(type == CHILD_THREAD){
+    }
+    else if(type == CHILD_THREAD)
+    {
         JNIEnv *jniEnv;
-        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
-            if(LOG_DEBUG){
-                LOGE("get child thread jnienv wrong");
+        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+        {
+            if(LOG_DEBUG)
+            {
+                LOGE("get child thread jnienv worng");
             }
             return;
         }
         jniEnv->CallVoidMethod(jobj, jmid_parpared);
         javaVM->DetachCurrentThread();
     }
+
 }
 
 void WlCallJava::onCallLoad(int type, bool load) {
-    if(type == MAIN_THREAD){
+
+    if(type == MAIN_THREAD)
+    {
         jniEnv->CallVoidMethod(jobj, jmid_load, load);
-    }else if(type == CHILD_THREAD){
+    }
+    else if(type == CHILD_THREAD)
+    {
         JNIEnv *jniEnv;
-        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
-            if(LOG_DEBUG){
-                LOGE("call onCallLoad wrong");
+        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+        {
+            if(LOG_DEBUG)
+            {
+                LOGE("call onCallLoad worng");
             }
             return;
         }
         jniEnv->CallVoidMethod(jobj, jmid_load, load);
         javaVM->DetachCurrentThread();
     }
+
+
 }
 
 void WlCallJava::onCallTimeInfo(int type, int curr, int total) {
-    if(type == MAIN_THREAD){
+    if(type == MAIN_THREAD)
+    {
         jniEnv->CallVoidMethod(jobj, jmid_timeinfo, curr, total);
-    }else if(type == CHILD_THREAD){
+    }
+    else if(type == CHILD_THREAD)
+    {
         JNIEnv *jniEnv;
-        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
-            if(LOG_DEBUG){
-                LOGE("call onCallTimeInfo wrong");
+        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+        {
+            if(LOG_DEBUG)
+            {
+                LOGE("call onCallTimeInfo worng");
             }
             return;
         }
@@ -79,15 +102,20 @@ WlCallJava::~WlCallJava() {
 }
 
 void WlCallJava::onCallError(int type, int code, char *msg) {
-    if(type == MAIN_THREAD){
+    if(type == MAIN_THREAD)
+    {
         jstring jmsg = jniEnv->NewStringUTF(msg);
-        jniEnv->CallVoidMethod(jobj, jmid_error, code, msg);
+        jniEnv->CallVoidMethod(jobj, jmid_error, code, jmsg);
         jniEnv->DeleteLocalRef(jmsg);
-    }else if(type == CHILD_THREAD){
+    }
+    else if(type == CHILD_THREAD)
+    {
         JNIEnv *jniEnv;
-        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
-            if(LOG_DEBUG){
-                LOGE("call onCallError wrong");
+        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+        {
+            if(LOG_DEBUG)
+            {
+                LOGE("call onCallError worng");
             }
             return;
         }
@@ -99,13 +127,18 @@ void WlCallJava::onCallError(int type, int code, char *msg) {
 }
 
 void WlCallJava::onCallComplete(int type) {
-    if(type == MAIN_THREAD){
+    if(type == MAIN_THREAD)
+    {
         jniEnv->CallVoidMethod(jobj, jmid_complete);
-    }else if(type == CHILD_THREAD){
+    }
+    else if(type == CHILD_THREAD)
+    {
         JNIEnv *jniEnv;
-        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
-            if(LOG_DEBUG){
-                LOGE("call onCallComplete wrong");
+        if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+        {
+            if(LOG_DEBUG)
+            {
+                LOGE("call onCallComplete worng");
             }
             return;
         }
@@ -115,10 +148,13 @@ void WlCallJava::onCallComplete(int type) {
 }
 
 void WlCallJava::onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu, uint8_t *fv) {
+
     JNIEnv *jniEnv;
-    if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK){
-        if(LOG_DEBUG){
-            LOGE("call onCallRenderYUV wrong");
+    if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+    {
+        if(LOG_DEBUG)
+        {
+            LOGE("call onCallComplete worng");
         }
         return;
     }
@@ -129,9 +165,8 @@ void WlCallJava::onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu
     jbyteArray u = jniEnv->NewByteArray(width * height / 4);
     jniEnv->SetByteArrayRegion(u, 0, width * height / 4, reinterpret_cast<const jbyte *>(fu));
 
-    jbyteArray v = jniEnv->NewByteArray(width * height);
+    jbyteArray v = jniEnv->NewByteArray(width * height / 4);
     jniEnv->SetByteArrayRegion(v, 0, width * height / 4, reinterpret_cast<const jbyte *>(fv));
-
 
     jniEnv->CallVoidMethod(jobj, jmid_renderyuv, width, height, y, u, v);
 

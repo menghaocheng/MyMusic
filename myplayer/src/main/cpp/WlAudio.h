@@ -1,10 +1,9 @@
 //
-// Created by Administrator on 2020/4/17.
+// Created by yangw on 2018-2-28.
 //
 
 #ifndef MYMUSIC_WLAUDIO_H
 #define MYMUSIC_WLAUDIO_H
-
 
 #include "WlQueue.h"
 #include "WlPlaystatus.h"
@@ -39,9 +38,10 @@ public:
 
     int duration = 0;
     AVRational time_base;
-    double clock; //总的播放时长
-    double now_time; //当前frame时间
-    double last_time; //上一次调用时间
+    double clock;//总的播放时长
+    double now_time;//当前frame时间
+    double last_tiem; //上一次调用时间
+
 
     // 引擎接口
     SLObjectItf engineObject = NULL;

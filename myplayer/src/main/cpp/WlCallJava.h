@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2020/4/17.
+// Created by yangw on 2018-2-28.
 //
 
 #ifndef MYMUSIC_WLCALLJAVA_H
@@ -7,6 +7,7 @@
 
 #include "jni.h"
 #include <linux/stddef.h>
+#include <stdint.h>
 #include "AndroidLog.h"
 
 #define MAIN_THREAD 0

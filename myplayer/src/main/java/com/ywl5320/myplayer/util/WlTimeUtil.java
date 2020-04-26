@@ -1,5 +1,9 @@
 package com.ywl5320.myplayer.util;
 
+/**
+ * Created by ywl on 2017-12-22.
+ */
+
 public class WlTimeUtil {
 
     /**
@@ -31,16 +35,20 @@ public class WlTimeUtil {
         }
 
         String ss = "00";
-        if (seconds > 0){
-            if(seconds < 10){
+        if (seconds > 0) {
+            if (seconds < 10) {
                 ss = "0" + seconds;
             } else {
                 ss = seconds + "";
             }
         }
-        if(totalsecds >= 3600){
+        if(totalsecds >= 3600)
+        {
             return sh + ":" + sm + ":" + ss;
         }
         return sm + ":" + ss;
+
     }
+
+
 }

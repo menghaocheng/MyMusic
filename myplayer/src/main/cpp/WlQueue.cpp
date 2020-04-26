@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2020/4/18.
+// Created by yangw on 2018-3-6.
 //
 
 #include "WlQueue.h"
@@ -32,10 +32,13 @@ int WlQueue::getAvpacket(AVPacket *packet) {
 
     pthread_mutex_lock(&mutexPacket);
 
-    while(playstatus != NULL && !playstatus->exit){
-        if(queuePacket.size() > 0){
-            AVPacket *avPacket = queuePacket.front();
-            if(av_packet_ref(packet, avPacket) == 0){
+    while(playstatus != NULL && !playstatus->exit)
+    {
+        if(queuePacket.size() > 0)
+        {
+            AVPacket *avPacket =  queuePacket.front();
+            if(av_packet_ref(packet, avPacket) == 0)
+            {
                 queuePacket.pop();
             }
             av_packet_free(&avPacket);
@@ -64,7 +67,8 @@ void WlQueue::clearAvpacket() {
     pthread_cond_signal(&condPacket);
     pthread_mutex_unlock(&mutexPacket);
 
-    while(!queuePacket.empty()){
+    while (!queuePacket.empty())
+    {
         AVPacket *packet = queuePacket.front();
         queuePacket.pop();
         av_packet_free(&packet);
@@ -74,5 +78,3 @@ void WlQueue::clearAvpacket() {
     pthread_mutex_unlock(&mutexPacket);
 
 }
-
-

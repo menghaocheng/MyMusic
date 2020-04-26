@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2020/4/17.
+// Created by yangw on 2018-2-28.
 //
 
 #ifndef MYMUSIC_WLFFMPEG_H

@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2020/4/25.
+// Created by yangw on 2018-5-14.
 //
 
 #ifndef MYMUSIC_WLVIDEO_H

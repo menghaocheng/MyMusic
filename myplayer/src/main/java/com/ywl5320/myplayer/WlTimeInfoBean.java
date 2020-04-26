@@ -1,5 +1,9 @@
 package com.ywl5320.myplayer;
 
+/**
+ * Created by yangw on 2018-3-25.
+ */
+
 public class WlTimeInfoBean {
 
     private int currentTime;
