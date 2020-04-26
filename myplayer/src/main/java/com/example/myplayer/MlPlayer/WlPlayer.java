@@ -180,6 +180,12 @@ public class WlPlayer {
             parpared();
         }
     }
+
+    public void onCallRenderYUV(int width , int height, byte[] y, byte[] u, byte[] v){
+        MyLog.d("获取到视频yuv数据");
+    }
+
+
     private native void n_parpared(String source);
     private native void n_start();
     private native void n_pause();
