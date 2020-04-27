@@ -100,8 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void begin(View view){
         wlPlayer.setSource("/sdcard/Movies/《刺猬索尼克》定档2月28日，童年经典首登银幕，音速出击拯救世界！.mp4");
-        wlPlayer.setSource("/sdcard/Movies/《你好世界》少男为爱穿越 最后一秒故事反转《你好世界》敬请期待.mp4");
-        wlPlayer.setSource("/sdcard/Movies/《合法伴侣》定档3月13日，李治廷白客上演“假情侣真兄弟”.mp4");
+        //wlPlayer.setSource("/sdcard/Movies/bandicam.mp4");
+        //wlPlayer.setSource("/sdcard/Movies/《你好世界》少男为爱穿越 最后一秒故事反转《你好世界》敬请期待.mp4");
+        ///wlPlayer.setSource("/sdcard/Movies/《合法伴侣》定档3月13日，李治廷白客上演“假情侣真兄弟”.mp4");
         //wlPlayer.setSource("http://mpge.5nd.com/2015/2015-12-26/69708/1.mp3");
         //wlPlayer.setSource("http://downsc.chinaz.net/Files/DownLoad/sound1/202004/12723.mp3");
         //wlPlayer.setSource("/mnt/sdcard/Music/xianggelila.mp3");

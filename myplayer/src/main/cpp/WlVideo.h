@@ -8,6 +8,7 @@
 
 #include "WlQueue.h"
 #include "WlCallJava.h"
+#include "WlAudio.h"
 
 extern "C"
 {
@@ -27,9 +28,11 @@ public:
     WlPlaystatus *playstatus = NULL;
     WlCallJava *wlCallJava = NULL;
     AVRational time_base;
-
-
     pthread_t thread_play;
+    WlAudio *audio = NULL;
+    double clock = 0;
+    double delayTime = 0;
+    double defaultDelayTime = 0.0166;
 
 
 
@@ -41,6 +44,9 @@ public:
 
     void release();
 
+    double getFrameDiffTime(AVFrame *avFrame);
+
+    double getDelayTime(double diff);
 
 
 

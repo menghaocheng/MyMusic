@@ -225,7 +225,7 @@ public class WlPlayer {
 
     public void onCallRenderYUV(int width, int height, byte[] y, byte[] u, byte[] v)
     {
-        MyLog.d("获取到视频的yuv数据");
+        MyLog.d("获取到视频的yuv数据:y=" + y.length + ",u=" + u.length + ",v=" + v.length);
         if(wlGLSurfaceView != null)
         {
             wlGLSurfaceView.setYUVData(width, height, y, u, v);

@@ -92,6 +92,17 @@ void WlFFmpeg::decodeFFmpegThread() {
                 video->streamIndex = i;
                 video->codecpar = pFormatCtx->streams[i]->codecpar;
                 video->time_base = pFormatCtx->streams[i]->time_base;
+
+                int num = pFormatCtx->streams[i]->avg_frame_rate.num;
+                int den = pFormatCtx->streams[i]->avg_frame_rate.den;
+                if(num != 0 && den != 0)
+                {
+                    int fps = num / den;//[25 / 1]
+                    video->defaultDelayTime = 1.0 / fps;
+                }
+
+
+
             }
         }
 
@@ -124,6 +135,13 @@ void WlFFmpeg::start() {
     {
         return;
     }
+    if(video == NULL)
+    {
+        return;
+    }
+
+    video->audio = audio;
+
     audio->play();
     video->play();
     while(playstatus != NULL && !playstatus->exit)
