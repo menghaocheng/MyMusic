@@ -40,6 +40,7 @@ public class WlPlayer {
     private WlOnErrorListener wlOnErrorListener;
     private WlOnCompleteListener wlOnCompleteListener;
     private WlGLSurfaceView wlGLSurfaceView;
+    private int duration = 0;
 
 
     public WlPlayer()
@@ -139,6 +140,7 @@ public class WlPlayer {
     public void stop()
     {
         wlTimeInfoBean = null;
+        duration = 0;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -159,9 +161,9 @@ public class WlPlayer {
         stop();
     }
 
-
-
-
+    public int getDuration() {
+        return duration;
+    }
 
     /**
      * c++回调java的方法
@@ -190,6 +192,7 @@ public class WlPlayer {
             {
                 wlTimeInfoBean = new WlTimeInfoBean();
             }
+            duration = totalTime;
             wlTimeInfoBean.setCurrentTime(currentTime);
             wlTimeInfoBean.setTotalTime(totalTime);
             wlOnTimeInfoListener.onTimeInfo(wlTimeInfoBean);

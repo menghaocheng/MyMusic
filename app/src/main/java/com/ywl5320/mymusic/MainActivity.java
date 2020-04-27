@@ -5,6 +5,7 @@ import android.os.Message;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.ywl5320.myplayer.WlTimeInfoBean;
@@ -24,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private WlPlayer wlPlayer;
     private TextView tvTime;
     private WlGLSurfaceView wlGLSurfaceView;
+    private SeekBar seekBar;
+    private int position;
+    private boolean seek = false;
 
 
     @Override
@@ -32,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tvTime = findViewById(R.id.tv_time);
         wlGLSurfaceView = findViewById(R.id.wlglsurfaceview);
+        seekBar = findViewById(R.id.seekbar);
         wlPlayer = new WlPlayer();
         wlPlayer.setWlGLSurfaceView(wlGLSurfaceView);
         wlPlayer.setWlOnParparedListener(new WlOnParparedListener() {
@@ -94,6 +99,24 @@ public class MainActivity extends AppCompatActivity {
                 MyLog.d("播放完成了");
             }
         });
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                position = progress * wlPlayer.getDuration() / 100;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                seek = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                wlPlayer.seek(position);
+                seek = false;
+            }
+        });
     }
 
 
@@ -129,6 +152,12 @@ public class MainActivity extends AppCompatActivity {
                 WlTimeInfoBean wlTimeInfoBean = (WlTimeInfoBean) msg.obj;
                 tvTime.setText(WlTimeUtil.secdsToDateFormat(wlTimeInfoBean.getTotalTime(), wlTimeInfoBean.getTotalTime())
                 + "/" + WlTimeUtil.secdsToDateFormat(wlTimeInfoBean.getCurrentTime(), wlTimeInfoBean.getTotalTime()));
+
+
+                if(!seek && wlTimeInfoBean.getTotalTime() > 0)
+                {
+                    seekBar.setProgress(wlTimeInfoBean.getCurrentTime() * 100 / wlTimeInfoBean.getTotalTime());
+                }
             }
         }
     };
@@ -137,9 +166,6 @@ public class MainActivity extends AppCompatActivity {
         wlPlayer.stop();
     }
 
-    public void seek(View view) {
-        wlPlayer.seek(260);
-    }
 
     public void next(View view) {
         //wlPlayer.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");

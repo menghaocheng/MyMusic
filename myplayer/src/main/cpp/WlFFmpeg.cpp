@@ -100,9 +100,6 @@ void WlFFmpeg::decodeFFmpegThread() {
                     int fps = num / den;//[25 / 1]
                     video->defaultDelayTime = 1.0 / fps;
                 }
-
-
-
             }
         }
 
@@ -152,11 +149,11 @@ void WlFFmpeg::start() {
             continue;
         }
 
-//        if(audio->queue->getQueueSize() > 40)
-//        {
-//            av_usleep(1000 * 100);
-//            continue;
-//        }
+        if(audio->queue->getQueueSize() > 40)
+        {
+            av_usleep(1000 * 100);
+            continue;
+        }
         AVPacket *avPacket = av_packet_alloc();
         if(av_read_frame(pFormatCtx, avPacket) == 0)
         {
@@ -182,7 +179,11 @@ void WlFFmpeg::start() {
                     av_usleep(1000 * 100);
                     continue;
                 } else{
-                    playstatus->exit = true;
+                    if(!playstatus->seek)
+                    {
+                        av_usleep(1000 * 100);
+                        playstatus->exit = true;
+                    }
                     break;
                 }
             }
@@ -198,6 +199,12 @@ void WlFFmpeg::start() {
 }
 
 void WlFFmpeg::pause() {
+
+    if(playstatus != NULL)
+    {
+        playstatus->pause = true;
+    }
+
     if(audio != NULL)
     {
         audio->pause();
@@ -205,6 +212,10 @@ void WlFFmpeg::pause() {
 }
 
 void WlFFmpeg::resume() {
+    if(playstatus != NULL)
+    {
+        playstatus->pause = false;
+    }
     if(audio != NULL)
     {
         audio->resume();
@@ -292,24 +303,37 @@ WlFFmpeg::~WlFFmpeg() {
 
 void WlFFmpeg::seek(int64_t secds) {
 
+    LOGE("seek time %d", secds);
     if(duration <= 0)
     {
         return;
     }
     if(secds >= 0 && secds <= duration)
     {
+        playstatus->seek = true;
+        pthread_mutex_lock(&seek_mutex);
+        int64_t rel = secds * AV_TIME_BASE;
+        LOGE("rel time %d", rel);
+        avformat_seek_file(pFormatCtx, -1, INT64_MIN, rel, INT64_MAX, 0);
         if(audio != NULL)
         {
-            playstatus->seek = true;
             audio->queue->clearAvpacket();
             audio->clock = 0;
             audio->last_tiem = 0;
-            pthread_mutex_lock(&seek_mutex);
-            int64_t rel = secds * AV_TIME_BASE;
-            avformat_seek_file(pFormatCtx, -1, INT64_MIN, rel, INT64_MAX, 0);
-            pthread_mutex_unlock(&seek_mutex);
-            playstatus->seek = false;
+            pthread_mutex_lock(&audio->codecMutex);
+            avcodec_flush_buffers(audio->avCodecContext);
+            pthread_mutex_unlock(&audio->codecMutex);
         }
+        if(video != NULL)
+        {
+            video->queue->clearAvpacket();
+            video->clock = 0;
+            pthread_mutex_lock(&video->codecMutex);
+            avcodec_flush_buffers(video->avCodecContext);
+            pthread_mutex_unlock(&video->codecMutex);
+        }
+        pthread_mutex_unlock(&seek_mutex);
+        playstatus->seek = false;
     }
 }
 

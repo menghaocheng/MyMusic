@@ -5,7 +5,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 import com.ywl5320.myplayer.R;
-import com.ywl5320.myplayer.log.MyLog;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -130,7 +129,6 @@ public class WlRender implements GLSurfaceView.Renderer{
     {
         if(width_yuv > 0 && height_yuv > 0 && y != null && u != null && v != null)
         {
-
             GLES20.glUseProgram(program_yuv);
 
             GLES20.glEnableVertexAttribArray(avPosition_yuv);
@@ -161,13 +159,7 @@ public class WlRender implements GLSurfaceView.Renderer{
             y = null;
             u = null;
             v = null;
-
-
-        }
-        else {
-            MyLog.d("HHHC:0====>width_yuv=" + width_yuv + ",height_yuv=" + height_yuv);
         }
     }
-
 
 }

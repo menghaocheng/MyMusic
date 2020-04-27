@@ -59,6 +59,8 @@ public:
     //缓冲器队列接口
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
 
+    pthread_mutex_t codecMutex;
+
 public:
     WlAudio(WlPlaystatus *playstatus, int sample_rate, WlCallJava *callJava);
     ~WlAudio();

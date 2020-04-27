@@ -33,6 +33,8 @@ public:
     double clock = 0;
     double delayTime = 0;
     double defaultDelayTime = 0.0166;
+    pthread_mutex_t codecMutex;
+
 
 
 
