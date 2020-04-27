@@ -40,6 +40,7 @@ public:
 
     int codectype = CODEC_YUV;
 
+    AVBSFContext *abs_ctx = NULL;
 
 public:
     WlVideo(WlPlaystatus *playstatus, WlCallJava *wlCallJava);

@@ -34,6 +34,8 @@ public:
     pthread_mutex_t seek_mutex;
     bool supportMediacodec = false;
 
+    const AVBitStreamFilter *bsFilter = NULL;
+
 public:
     WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url);
     ~WlFFmpeg();

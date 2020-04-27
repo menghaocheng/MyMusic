@@ -14,48 +14,71 @@ WlVideo::WlVideo(WlPlaystatus *playstatus, WlCallJava *wlCallJava) {
     pthread_mutex_init(&codecMutex, NULL);
 }
 
-void *playVideo(void *data) {
+void * playVideo(void *data)
+{
 
     WlVideo *video = static_cast<WlVideo *>(data);
 
-    while (video->playstatus != NULL && !video->playstatus->exit) {
+    while(video->playstatus != NULL && !video->playstatus->exit)
+    {
 
-        if (video->playstatus->seek) {
+        if(video->playstatus->seek)
+        {
             av_usleep(1000 * 100);
             continue;
         }
-        if (video->playstatus->pause) {
+        if(video->playstatus->pause)
+        {
             av_usleep(1000 * 100);
             continue;
         }
-        if (video->queue->getQueueSize() == 0) {
-            if (!video->playstatus->load) {
+        if(video->queue->getQueueSize() == 0)
+        {
+            if(!video->playstatus->load)
+            {
                 video->playstatus->load = true;
                 video->wlCallJava->onCallLoad(CHILD_THREAD, true);
             }
             av_usleep(1000 * 100);
             continue;
-        } else {
-            if (video->playstatus->load) {
+        } else{
+            if(video->playstatus->load)
+            {
                 video->playstatus->load = false;
                 video->wlCallJava->onCallLoad(CHILD_THREAD, false);
             }
         }
         AVPacket *avPacket = av_packet_alloc();
-        if (video->queue->getAvpacket(avPacket) != 0) {
+        if(video->queue->getAvpacket(avPacket) != 0)
+        {
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
             continue;
         }
-        if (video->codectype == CODEC_MEDIACODEC) {
-            LOGE("硬解码视频");
-            av_packet_free(&avPacket);
-            av_free(avPacket);
+        if(video->codectype == CODEC_MEDIACODEC)
+        {
+            if(av_bsf_send_packet(video->abs_ctx, avPacket) != 0)
+            {
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                avPacket = NULL;
+                continue;
+            }
+            while(av_bsf_receive_packet(video->abs_ctx, avPacket) == 0)
+            {
+                LOGE("开始解码");
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                continue;
+            }
             avPacket = NULL;
-        } else if (video->codectype == CODEC_YUV) {
+        }
+        else if(video->codectype == CODEC_YUV)
+        {
             pthread_mutex_lock(&video->codecMutex);
-            if (avcodec_send_packet(video->avCodecContext, avPacket) != 0) {
+            if(avcodec_send_packet(video->avCodecContext, avPacket) != 0)
+            {
                 av_packet_free(&avPacket);
                 av_free(avPacket);
                 avPacket = NULL;
@@ -63,7 +86,8 @@ void *playVideo(void *data) {
                 continue;
             }
             AVFrame *avFrame = av_frame_alloc();
-            if (avcodec_receive_frame(video->avCodecContext, avFrame) != 0) {
+            if(avcodec_receive_frame(video->avCodecContext, avFrame) != 0)
+            {
                 av_frame_free(&avFrame);
                 av_free(avFrame);
                 avFrame = NULL;
@@ -74,7 +98,8 @@ void *playVideo(void *data) {
                 continue;
             }
             LOGE("子线程解码一个AVframe成功");
-            if (avFrame->format == AV_PIX_FMT_YUV420P) {
+            if(avFrame->format == AV_PIX_FMT_YUV420P)
+            {
                 LOGE("当前视频是YUV420P格式");
 
                 double diff = video->getFrameDiffTime(avFrame);
@@ -115,7 +140,8 @@ void *playVideo(void *data) {
                         AV_PIX_FMT_YUV420P,
                         SWS_BICUBIC, NULL, NULL, NULL);
 
-                if (!sws_ctx) {
+                if(!sws_ctx)
+                {
                     av_frame_free(&pFrameYUV420P);
                     av_free(pFrameYUV420P);
                     av_free(buffer);
@@ -172,11 +198,18 @@ void WlVideo::play() {
 
 void WlVideo::release() {
 
-    if (queue != NULL) {
-        delete (queue);
+    if(queue != NULL)
+    {
+        delete(queue);
         queue = NULL;
     }
-    if (avCodecContext != NULL) {
+    if(abs_ctx != NULL)
+    {
+        av_bsf_free(&abs_ctx);
+        abs_ctx = NULL;
+    }
+    if(avCodecContext != NULL)
+    {
         pthread_mutex_lock(&codecMutex);
         avcodec_close(avCodecContext);
         avcodec_free_context(&avCodecContext);
@@ -184,10 +217,12 @@ void WlVideo::release() {
         pthread_mutex_unlock(&codecMutex);
     }
 
-    if (playstatus != NULL) {
+    if(playstatus != NULL)
+    {
         playstatus = NULL;
     }
-    if (wlCallJava != NULL) {
+    if(wlCallJava != NULL)
+    {
         wlCallJava = NULL;
     }
 
@@ -200,12 +235,14 @@ WlVideo::~WlVideo() {
 double WlVideo::getFrameDiffTime(AVFrame *avFrame) {
 
     double pts = av_frame_get_best_effort_timestamp(avFrame);
-    if (pts == AV_NOPTS_VALUE) {
+    if(pts == AV_NOPTS_VALUE)
+    {
         pts = 0;
     }
     pts *= av_q2d(time_base);
 
-    if (pts > 0) {
+    if(pts > 0)
+    {
         clock = pts;
     }
 
@@ -215,30 +252,45 @@ double WlVideo::getFrameDiffTime(AVFrame *avFrame) {
 
 double WlVideo::getDelayTime(double diff) {
 
-    if (diff > 0.003) {
+    if(diff > 0.003)
+    {
         delayTime = delayTime * 2 / 3;
-        if (delayTime < defaultDelayTime / 2) {
+        if(delayTime < defaultDelayTime / 2)
+        {
             delayTime = defaultDelayTime * 2 / 3;
-        } else if (delayTime > defaultDelayTime * 2) {
+        }
+        else if(delayTime > defaultDelayTime * 2)
+        {
             delayTime = defaultDelayTime * 2;
         }
-    } else if (diff < -0.003) {
+    }
+    else if(diff < - 0.003)
+    {
         delayTime = delayTime * 3 / 2;
-        if (delayTime < defaultDelayTime / 2) {
+        if(delayTime < defaultDelayTime / 2)
+        {
             delayTime = defaultDelayTime * 2 / 3;
-        } else if (delayTime > defaultDelayTime * 2) {
+        }
+        else if(delayTime > defaultDelayTime * 2)
+        {
             delayTime = defaultDelayTime * 2;
         }
-    } else if (diff == 0.003) {
+    }
+    else if(diff == 0.003)
+    {
 
     }
-    if (diff >= 0.25) {
+    if(diff >= 0.25)
+    {
         delayTime = 0;
-    } else if (diff <= -0.25) {
+    }
+    else if(diff <= -0.25)
+    {
         delayTime = defaultDelayTime * 2;
     }
 
-    if (fabs(diff) >= 10) {
+    if(fabs(diff) >= 10)
+    {
         delayTime = defaultDelayTime;
     }
     return delayTime;
