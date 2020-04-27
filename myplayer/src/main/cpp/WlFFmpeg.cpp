@@ -136,9 +136,20 @@ void WlFFmpeg::start() {
     {
         return;
     }
-
+    supportMediacodec = false;
     video->audio = audio;
 
+    const char* codecName = ((const AVCodec*)video->avCodecContext->codec)->name;
+    if(supportMediacodec = callJava->onCallIsSupportVideo(codecName))
+    {
+        LOGE("当前设备支持硬解码当前视频");
+
+    }
+
+    if(supportMediacodec)
+    {
+        video->codectype = CODEC_MEDIACODEC;
+    }
     audio->play();
     video->play();
     while(playstatus != NULL && !playstatus->exit)

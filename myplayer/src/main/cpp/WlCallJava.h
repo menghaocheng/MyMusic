@@ -27,6 +27,7 @@ public:
     jmethodID jmid_error;
     jmethodID jmid_complete;
     jmethodID jmid_renderyuv;
+    jmethodID jmid_supportvideo;
 
 public:
     WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj);
@@ -43,6 +44,8 @@ public:
     void onCallComplete(int type);
 
     void onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu, uint8_t *fv);
+
+    bool onCallIsSupportVideo(const char *ffcodecname);
 
 };
 

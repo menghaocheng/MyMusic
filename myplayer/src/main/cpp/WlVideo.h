@@ -10,6 +10,9 @@
 #include "WlCallJava.h"
 #include "WlAudio.h"
 
+#define CODEC_YUV 0
+#define CODEC_MEDIACODEC 1
+
 extern "C"
 {
 #include <libswscale/swscale.h>
@@ -35,7 +38,7 @@ public:
     double defaultDelayTime = 0.0166;
     pthread_mutex_t codecMutex;
 
-
+    int codectype = CODEC_YUV;
 
 
 public:

@@ -27,6 +27,7 @@ WlCallJava::WlCallJava(_JavaVM *javaVM, JNIEnv *env, jobject *obj) {
     jmid_error = env->GetMethodID(jlz, "onCallError", "(ILjava/lang/String;)V");
     jmid_complete = env->GetMethodID(jlz, "onCallComplete", "()V");
     jmid_renderyuv = env->GetMethodID(jlz, "onCallRenderYUV", "(II[B[B[B)V");
+    jmid_supportvideo = env->GetMethodID(jlz, "onCallIsSupportMediaCodec", "(Ljava/lang/String;)Z");
 }
 
 void WlCallJava::onCallParpared(int type) {
@@ -175,4 +176,24 @@ void WlCallJava::onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu
     jniEnv->DeleteLocalRef(v);
 
     javaVM->DetachCurrentThread();
+}
+
+bool WlCallJava::onCallIsSupportVideo(const char *ffcodecname) {
+
+    bool support = false;
+    JNIEnv *jniEnv;
+    if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
+    {
+        if(LOG_DEBUG)
+        {
+            LOGE("call onCallComplete worng");
+        }
+        return support;
+    }
+
+    jstring type = jniEnv->NewStringUTF(ffcodecname);
+    support = jniEnv->CallBooleanMethod(jobj, jmid_supportvideo, type);
+    jniEnv->DeleteLocalRef(type);
+    javaVM->DetachCurrentThread();
+    return support;
 }

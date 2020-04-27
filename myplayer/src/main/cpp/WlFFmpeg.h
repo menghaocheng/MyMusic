@@ -32,6 +32,8 @@ public:
     bool exit = false;
     int duration = 0;
     pthread_mutex_t seek_mutex;
+    bool supportMediacodec = false;
+
 public:
     WlFFmpeg(WlPlaystatus *playstatus, WlCallJava *callJava, const char *url);
     ~WlFFmpeg();

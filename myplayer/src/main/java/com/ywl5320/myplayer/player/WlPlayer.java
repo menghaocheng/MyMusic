@@ -11,6 +11,7 @@ import com.ywl5320.myplayer.listener.WlOnPauseResumeListener;
 import com.ywl5320.myplayer.listener.WlOnTimeInfoListener;
 import com.ywl5320.myplayer.log.MyLog;
 import com.ywl5320.myplayer.opengl.WlGLSurfaceView;
+import com.ywl5320.myplayer.util.WlVideoSupportUitl;
 
 /**
  * Created by yangw on 2018-2-28.
@@ -235,7 +236,10 @@ public class WlPlayer {
         }
     }
 
-
+    public boolean onCallIsSupportMediaCodec(String ffcodecname)
+    {
+        return WlVideoSupportUitl.isSupportCodec(ffcodecname);
+    }
 
     private native void n_parpared(String source);
     private native void n_start();
