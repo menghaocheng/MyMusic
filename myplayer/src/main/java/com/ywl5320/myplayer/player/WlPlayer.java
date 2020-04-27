@@ -1,6 +1,9 @@
 package com.ywl5320.myplayer.player;
 
+import android.media.MediaCodec;
+import android.media.MediaFormat;
 import android.text.TextUtils;
+import android.view.Surface;
 
 import com.ywl5320.myplayer.WlTimeInfoBean;
 import com.ywl5320.myplayer.listener.WlOnCompleteListener;
@@ -12,6 +15,8 @@ import com.ywl5320.myplayer.listener.WlOnTimeInfoListener;
 import com.ywl5320.myplayer.log.MyLog;
 import com.ywl5320.myplayer.opengl.WlGLSurfaceView;
 import com.ywl5320.myplayer.util.WlVideoSupportUitl;
+
+import java.nio.ByteBuffer;
 
 /**
  * Created by yangw on 2018-2-28.
@@ -42,6 +47,11 @@ public class WlPlayer {
     private WlOnCompleteListener wlOnCompleteListener;
     private WlGLSurfaceView wlGLSurfaceView;
     private int duration = 0;
+
+    private MediaFormat mediaFormat;
+    private MediaCodec mediaCodec;
+    private Surface surface;
+    private MediaCodec.BufferInfo info;
 
 
     public WlPlayer()
@@ -240,6 +250,68 @@ public class WlPlayer {
     {
         return WlVideoSupportUitl.isSupportCodec(ffcodecname);
     }
+
+
+    /**
+     * 初始化MediaCodec
+     * @param codecName
+     * @param width
+     * @param height
+     * @param csd_0
+     * @param csd_1
+     */
+    public void initMediaCodec(String codecName, int width, int height, byte[] csd_0, byte[] csd_1)
+    {
+        if(surface != null)
+        {
+            try {
+                String mime = WlVideoSupportUitl.findVideoCodecName(codecName);
+                mediaFormat = MediaFormat.createVideoFormat(mime, width, height);
+                mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, width * height);
+                mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd_0));
+                mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd_1));
+                MyLog.d(mediaFormat.toString());
+                mediaCodec = MediaCodec.createDecoderByType(mime);
+
+                mediaCodec.configure(mediaFormat, surface, null, 0);
+                mediaCodec.start();
+
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            if(wlOnErrorListener != null)
+            {
+                wlOnErrorListener.onError(2001, "surface is null");
+            }
+        }
+    }
+
+    public void decodeAVPacket(int datasize, byte[] data)
+    {
+        if(surface != null && datasize > 0 && data != null)
+        {
+            int intputBufferIndex = mediaCodec.dequeueInputBuffer(10);
+            if(intputBufferIndex >= 0)
+            {
+                ByteBuffer byteBuffer = mediaCodec.getOutputBuffers()[intputBufferIndex];
+                byteBuffer.clear();
+                byteBuffer.put(data);
+                mediaCodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
+            }
+            int outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
+            while(outputBufferIndex >= 0)
+            {
+                mediaCodec.releaseOutputBuffer(outputBufferIndex, true);
+                outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
+            }
+        }
+    }
+
 
     private native void n_parpared(String source);
     private native void n_start();

@@ -68,6 +68,13 @@ void * playVideo(void *data)
             while(av_bsf_receive_packet(video->abs_ctx, avPacket) == 0)
             {
                 LOGE("开始解码");
+
+                double diff = video->getFrameDiffTime(NULL, avPacket);
+                LOGE("diff is %f", diff);
+
+                av_usleep(video->getDelayTime(diff) * 1000000);
+                video->wlCallJava->onCallDecodeAVPacket(avPacket->size, avPacket->data);
+
                 av_packet_free(&avPacket);
                 av_free(avPacket);
                 continue;
@@ -102,7 +109,7 @@ void * playVideo(void *data)
             {
                 LOGE("当前视频是YUV420P格式");
 
-                double diff = video->getFrameDiffTime(avFrame);
+                double diff = video->getFrameDiffTime(avFrame, NULL);
                 LOGE("diff is %f", diff);
 
                 av_usleep(video->getDelayTime(diff) * 1000000);
@@ -158,7 +165,7 @@ void * playVideo(void *data)
                         pFrameYUV420P->linesize);
                 //渲染
 
-                double diff = video->getFrameDiffTime(avFrame);
+                double diff = video->getFrameDiffTime(avFrame, NULL);
                 LOGE("diff is %f", diff);
 
                 av_usleep(video->getDelayTime(diff) * 1000000);
@@ -232,9 +239,17 @@ WlVideo::~WlVideo() {
     pthread_mutex_destroy(&codecMutex);
 }
 
-double WlVideo::getFrameDiffTime(AVFrame *avFrame) {
+double WlVideo::getFrameDiffTime(AVFrame *avFrame, AVPacket *avPacket) {
 
-    double pts = av_frame_get_best_effort_timestamp(avFrame);
+    double pts = 0;
+    if(avFrame != NULL)
+    {
+        pts = av_frame_get_best_effort_timestamp(avFrame);
+    }
+    if(avPacket != NULL)
+    {
+        pts = avPacket->pts;
+    }
     if(pts == AV_NOPTS_VALUE)
     {
         pts = 0;

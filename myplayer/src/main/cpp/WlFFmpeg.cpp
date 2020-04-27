@@ -147,7 +147,7 @@ void WlFFmpeg::start() {
         {
             bsFilter = av_bsf_get_by_name("h264_mp4toannexb");
         }
-        if(strcasecmp(codecName, "h265") == 0)
+        else if(strcasecmp(codecName, "h265") == 0)
         {
             bsFilter = av_bsf_get_by_name("hevc_mp4toannexb");
         }
@@ -177,11 +177,20 @@ void WlFFmpeg::start() {
         video->abs_ctx->time_base_in = video->time_base;
     }
 
-end:
-    //supportMediacodec = false;
+    end:
+//    supportMediacodec = false;
     if(supportMediacodec)
     {
         video->codectype = CODEC_MEDIACODEC;
+        video->wlCallJava->onCallInitMediacodec(
+                codecName,
+                video->avCodecContext->width,
+                video->avCodecContext->height,
+                video->avCodecContext->extradata_size,
+                video->avCodecContext->extradata_size,
+                video->avCodecContext->extradata,
+                video->avCodecContext->extradata
+                );
     }
     audio->play();
     video->play();
