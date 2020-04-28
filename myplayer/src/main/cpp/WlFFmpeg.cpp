@@ -190,7 +190,7 @@ void WlFFmpeg::start() {
                 video->avCodecContext->extradata_size,
                 video->avCodecContext->extradata,
                 video->avCodecContext->extradata
-                );
+        );
     }
     audio->play();
     video->play();

@@ -14,6 +14,7 @@ import com.ywl5320.myplayer.listener.WlOnPauseResumeListener;
 import com.ywl5320.myplayer.listener.WlOnTimeInfoListener;
 import com.ywl5320.myplayer.log.MyLog;
 import com.ywl5320.myplayer.opengl.WlGLSurfaceView;
+import com.ywl5320.myplayer.opengl.WlRender;
 import com.ywl5320.myplayer.util.WlVideoSupportUitl;
 
 import java.nio.ByteBuffer;
@@ -68,6 +69,16 @@ public class WlPlayer {
 
     public void setWlGLSurfaceView(WlGLSurfaceView wlGLSurfaceView) {
         this.wlGLSurfaceView = wlGLSurfaceView;
+        wlGLSurfaceView.getWlRender().setOnSurfaceCreateListener(new WlRender.OnSurfaceCreateListener() {
+            @Override
+            public void onSurfaceCreate(Surface s) {
+                if(surface == null)
+                {
+                    surface = s;
+                    MyLog.d("onSurfaceCreate");
+                }
+            }
+        });
     }
 
     /**
@@ -152,6 +163,7 @@ public class WlPlayer {
     {
         wlTimeInfoBean = null;
         duration = 0;
+        releaseMediacodec();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -242,6 +254,7 @@ public class WlPlayer {
         MyLog.d("获取到视频的yuv数据");
         if(wlGLSurfaceView != null)
         {
+            wlGLSurfaceView.getWlRender().setRenderType(WlRender.RENDER_YUV);
             wlGLSurfaceView.setYUVData(width, height, y, u, v);
         }
     }
@@ -265,6 +278,7 @@ public class WlPlayer {
         if(surface != null)
         {
             try {
+                wlGLSurfaceView.getWlRender().setRenderType(WlRender.RENDER_MEDIACODEC);
                 String mime = WlVideoSupportUitl.findVideoCodecName(codecName);
                 mediaFormat = MediaFormat.createVideoFormat(mime, width, height);
                 mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, width * height);
@@ -273,6 +287,7 @@ public class WlPlayer {
                 MyLog.d(mediaFormat.toString());
                 mediaCodec = MediaCodec.createDecoderByType(mime);
 
+                info = new MediaCodec.BufferInfo();
                 mediaCodec.configure(mediaFormat, surface, null, 0);
                 mediaCodec.start();
 
@@ -293,24 +308,46 @@ public class WlPlayer {
 
     public void decodeAVPacket(int datasize, byte[] data)
     {
-        if(surface != null && datasize > 0 && data != null)
+        MyLog.d("HHHA:0====>"+datasize);
+        if(surface != null && datasize > 0 && data != null && mediaCodec != null)
         {
+
             int intputBufferIndex = mediaCodec.dequeueInputBuffer(10);
+            MyLog.d("HHHA:0.1====>" + intputBufferIndex);
             if(intputBufferIndex >= 0)
             {
-                ByteBuffer byteBuffer = mediaCodec.getOutputBuffers()[intputBufferIndex];
+                ByteBuffer byteBuffer = mediaCodec.getInputBuffers()[intputBufferIndex];
                 byteBuffer.clear();
                 byteBuffer.put(data);
                 mediaCodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
             }
             int outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
+            MyLog.d("HHHA:0.2====>" + outputBufferIndex);
             while(outputBufferIndex >= 0)
             {
                 mediaCodec.releaseOutputBuffer(outputBufferIndex, true);
                 outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
+                MyLog.d("HHHA:0.2.1====>" + outputBufferIndex);
             }
         }
+        MyLog.d("HHHA:1====>");
     }
+
+    private void releaseMediacodec()
+    {
+        if(mediaCodec != null)
+        {
+            mediaCodec.flush();
+            mediaCodec.stop();
+            mediaCodec.release();
+
+            mediaCodec = null;
+            mediaFormat = null;
+            info = null;
+        }
+
+    }
+
 
 
     private native void n_parpared(String source);

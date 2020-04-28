@@ -200,7 +200,7 @@ bool WlCallJava::onCallIsSupportVideo(const char *ffcodecname) {
     return support;
 }
 
-void WlCallJava::onCallInitMediacodec(const char* mine, int width, int height, int csd0_size, int csd1_size, uint8_t *csd_0, uint8_t *csd_1) {
+void WlCallJava::onCallInitMediacodec(const char* mime, int width, int height, int csd0_size, int csd1_size, uint8_t *csd_0, uint8_t *csd_1) {
 
     JNIEnv *jniEnv;
     if(javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK)
@@ -209,10 +209,9 @@ void WlCallJava::onCallInitMediacodec(const char* mine, int width, int height, i
         {
             LOGE("call onCallComplete worng");
         }
-        return;
     }
 
-    jstring type = jniEnv->NewStringUTF(mine);
+    jstring type = jniEnv->NewStringUTF(mime);
     jbyteArray csd0 = jniEnv->NewByteArray(csd0_size);
     jniEnv->SetByteArrayRegion(csd0, 0, csd0_size, reinterpret_cast<const jbyte *>(csd_0));
     jbyteArray csd1 = jniEnv->NewByteArray(csd1_size);
@@ -235,7 +234,6 @@ void WlCallJava::onCallDecodeAVPacket(int datasize, uint8_t *packetdata) {
         {
             LOGE("call onCallComplete worng");
         }
-        return;
     }
     jbyteArray data = jniEnv->NewByteArray(datasize);
     jniEnv->SetByteArrayRegion(data, 0, datasize, reinterpret_cast<const jbyte *>(packetdata));
