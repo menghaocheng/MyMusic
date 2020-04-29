@@ -18,7 +18,7 @@ void *decodeFFmpeg(void *data)
 {
     WlFFmpeg *wlFFmpeg = (WlFFmpeg *) data;
     wlFFmpeg->decodeFFmpegThread();
-    pthread_exit(&wlFFmpeg->decodeThread);
+    return 0;
 }
 
 void WlFFmpeg::parpared() {
@@ -153,6 +153,7 @@ void WlFFmpeg::start() {
         }
         if(bsFilter == NULL)
         {
+            supportMediacodec = false;
             goto end;
         }
         if(av_bsf_alloc(bsFilter, &video->abs_ctx) != 0)
@@ -282,6 +283,9 @@ void WlFFmpeg::release() {
         LOGE("开始释放Ffmpe");
     }
     playstatus->exit = true;
+
+    pthread_join(decodeThread, NULL);
+
     pthread_mutex_lock(&init_mutex);
     int sleepCount = 0;
     while (!exit)
@@ -366,7 +370,7 @@ void WlFFmpeg::seek(int64_t secds) {
         playstatus->seek = true;
         pthread_mutex_lock(&seek_mutex);
         int64_t rel = secds * AV_TIME_BASE;
-        LOGE("rel time %d", rel);
+        LOGE("rel time %d", secds);
         avformat_seek_file(pFormatCtx, -1, INT64_MIN, rel, INT64_MAX, 0);
         if(audio != NULL)
         {
@@ -405,7 +409,7 @@ int WlFFmpeg::getCodecContext(AVCodecParameters *codecpar, AVCodecContext **avCo
     }
 
     *avCodecContext = avcodec_alloc_context3(dec);
-    if(!audio->avCodecContext)
+    if(!*avCodecContext)
     {
         if(LOG_DEBUG)
         {

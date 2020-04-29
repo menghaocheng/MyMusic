@@ -121,7 +121,7 @@ void * playVideo(void *data)
                         avFrame->data[0],
                         avFrame->data[1],
                         avFrame->data[2]);
-            } else {
+            } else{
                 LOGE("当前视频不是YUV420P格式");
                 AVFrame *pFrameYUV420P = av_frame_alloc();
                 int num = av_image_get_buffer_size(
@@ -194,16 +194,24 @@ void * playVideo(void *data)
         }
 
     }
-    pthread_exit(&video->thread_play);
+    return 0;
 }
 
 void WlVideo::play() {
 
-    pthread_create(&thread_play, NULL, playVideo, this);
-
+    if(playstatus != NULL && !playstatus->exit)
+    {
+        pthread_create(&thread_play, NULL, playVideo, this);
+    }
 }
 
 void WlVideo::release() {
+
+    if(queue != NULL)
+    {
+        queue->noticeQueue();
+    }
+    pthread_join(thread_play, NULL);
 
     if(queue != NULL)
     {
@@ -295,11 +303,11 @@ double WlVideo::getDelayTime(double diff) {
     {
 
     }
-    if(diff >= 0.25)
+    if(diff >= 0.5)
     {
         delayTime = 0;
     }
-    else if(diff <= -0.25)
+    else if(diff <= -0.5)
     {
         delayTime = defaultDelayTime * 2;
     }

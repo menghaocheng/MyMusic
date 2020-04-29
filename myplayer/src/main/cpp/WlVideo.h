@@ -35,12 +35,13 @@ public:
     WlAudio *audio = NULL;
     double clock = 0;
     double delayTime = 0;
-    double defaultDelayTime = 0.0166;
+    double defaultDelayTime = 0.04;
     pthread_mutex_t codecMutex;
 
     int codectype = CODEC_YUV;
 
     AVBSFContext *abs_ctx = NULL;
+
 
 public:
     WlVideo(WlPlaystatus *playstatus, WlCallJava *wlCallJava);

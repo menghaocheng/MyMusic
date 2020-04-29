@@ -56,7 +56,7 @@ void *startCallBack(void *data)
 {
     WlFFmpeg *fFmpeg = (WlFFmpeg *) data;
     fFmpeg->start();
-    pthread_exit(&thread_start);
+    return 0;
 }
 
 extern "C"
@@ -106,6 +106,7 @@ Java_com_ywl5320_myplayer_player_WlPlayer_n_1stop(JNIEnv *env, jobject instance)
     if(fFmpeg != NULL)
     {
         fFmpeg->release();
+        pthread_join(thread_start, NULL);
         delete(fFmpeg);
         fFmpeg = NULL;
         if(callJava != NULL)

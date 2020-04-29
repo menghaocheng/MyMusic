@@ -24,13 +24,15 @@ void *decodPlay(void *data)
 
     wlAudio->initOpenSLES();
 
-    pthread_exit(&wlAudio->thread_play);
+    return 0;
 }
 
 void WlAudio::play() {
 
-    pthread_create(&thread_play, NULL, decodPlay, this);
-
+    if(playstatus != NULL && !playstatus->exit)
+    {
+        pthread_create(&thread_play, NULL, decodPlay, this);
+    }
 }
 
 int WlAudio::resampleAudio() {
@@ -301,6 +303,12 @@ void WlAudio::resume() {
 }
 
 void WlAudio::release() {
+
+    if(queue != NULL)
+    {
+        queue->noticeQueue();
+    }
+    pthread_join(thread_play, NULL);
 
     if(queue != NULL)
     {
