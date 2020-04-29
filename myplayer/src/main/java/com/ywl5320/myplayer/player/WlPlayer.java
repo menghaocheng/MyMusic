@@ -163,11 +163,11 @@ public class WlPlayer {
     {
         wlTimeInfoBean = null;
         duration = 0;
-        releaseMediacodec();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 n_stop();
+                releaseMediacodec();
             }
         }).start();
     }
@@ -294,7 +294,7 @@ public class WlPlayer {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
         else
@@ -308,39 +308,47 @@ public class WlPlayer {
 
     public void decodeAVPacket(int datasize, byte[] data)
     {
-        MyLog.d("HHHA:0====>"+datasize);
         if(surface != null && datasize > 0 && data != null && mediaCodec != null)
         {
+            try
+            {
+                int intputBufferIndex = mediaCodec.dequeueInputBuffer(10);
+                if(intputBufferIndex >= 0)
+                {
+                    ByteBuffer byteBuffer = mediaCodec.getInputBuffers()[intputBufferIndex];
+                    byteBuffer.clear();
+                    byteBuffer.put(data);
+                    mediaCodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
+                }
+                int outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
+                while(outputBufferIndex >= 0)
+                {
+                    mediaCodec.releaseOutputBuffer(outputBufferIndex, true);
+                    outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
 
-            int intputBufferIndex = mediaCodec.dequeueInputBuffer(10);
-            MyLog.d("HHHA:0.1====>" + intputBufferIndex);
-            if(intputBufferIndex >= 0)
-            {
-                ByteBuffer byteBuffer = mediaCodec.getInputBuffers()[intputBufferIndex];
-                byteBuffer.clear();
-                byteBuffer.put(data);
-                mediaCodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
-            }
-            int outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
-            MyLog.d("HHHA:0.2====>" + outputBufferIndex);
-            while(outputBufferIndex >= 0)
-            {
-                mediaCodec.releaseOutputBuffer(outputBufferIndex, true);
-                outputBufferIndex = mediaCodec.dequeueOutputBuffer(info, 10);
-                MyLog.d("HHHA:0.2.1====>" + outputBufferIndex);
-            }
         }
-        MyLog.d("HHHA:1====>");
     }
 
     private void releaseMediacodec()
     {
         if(mediaCodec != null)
         {
-            mediaCodec.flush();
-            mediaCodec.stop();
-            mediaCodec.release();
-
+            try
+            {
+                mediaCodec.flush();
+                mediaCodec.stop();
+                mediaCodec.release();
+            }
+            catch(Exception e)
+            {
+                //e.printStackTrace();
+            }
             mediaCodec = null;
             mediaFormat = null;
             info = null;
