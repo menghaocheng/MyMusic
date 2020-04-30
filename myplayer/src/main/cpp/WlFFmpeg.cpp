@@ -41,7 +41,6 @@ int avformat_callback(void *ctx)
 void WlFFmpeg::decodeFFmpegThread() {
 
     pthread_mutex_lock(&init_mutex);
-    av_register_all();
     avformat_network_init();
     pFormatCtx = avformat_alloc_context();
 
