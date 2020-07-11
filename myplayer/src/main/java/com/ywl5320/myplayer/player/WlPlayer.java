@@ -315,7 +315,7 @@ public class WlPlayer {
                 int intputBufferIndex = mediaCodec.dequeueInputBuffer(10);
                 if(intputBufferIndex >= 0)
                 {
-                    ByteBuffer byteBuffer = mediaCodec.getInputBuffers()[intputBufferIndex];
+                    ByteBuffer byteBuffer = mediaCodec.getInputBuffer(intputBufferIndex);
                     byteBuffer.clear();
                     byteBuffer.put(data);
                     mediaCodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
